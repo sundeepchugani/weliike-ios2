@@ -1,0 +1,263 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E408FFBE16A13CF20039A66A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E408FFBD16A13CF20039A66A /* UIKit.framework */; };
+		E408FFC016A13CF20039A66A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E408FFBF16A13CF20039A66A /* Foundation.framework */; };
+		E408FFC216A13CF20039A66A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E408FFC116A13CF20039A66A /* CoreGraphics.framework */; };
+		E408FFC816A13CF20039A66A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E408FFC616A13CF20039A66A /* InfoPlist.strings */; };
+		E408FFCA16A13CF20039A66A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E408FFC916A13CF20039A66A /* main.m */; };
+		E408FFCE16A13CF20039A66A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E408FFCD16A13CF20039A66A /* AppDelegate.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E408FFB916A13CF20039A66A /* WeLiiKe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeLiiKe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E408FFBD16A13CF20039A66A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		E408FFBF16A13CF20039A66A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		E408FFC116A13CF20039A66A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		E408FFC516A13CF20039A66A /* WeLiiKe-Info.plist */ = {isa = PBXFileReference; path = "WeLiiKe-Info.plist"; sourceTree = "<group>"; };
+		E408FFC716A13CF20039A66A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E408FFC916A13CF20039A66A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		E408FFCB16A13CF20039A66A /* WeLiiKe-Prefix.pch */ = {isa = PBXFileReference; path = "WeLiiKe-Prefix.pch"; sourceTree = "<group>"; };
+		E408FFCC16A13CF20039A66A /* AppDelegate.h */ = {isa = PBXFileReference; path = AppDelegate.h; sourceTree = "<group>"; };
+		E408FFCD16A13CF20039A66A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E408FFB616A13CF10039A66A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E408FFBE16A13CF20039A66A /* UIKit.framework in Frameworks */,
+				E408FFC016A13CF20039A66A /* Foundation.framework in Frameworks */,
+				E408FFC216A13CF20039A66A /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E408FFAE16A13CF10039A66A = {
+			isa = PBXGroup;
+			children = (
+				E408FFC316A13CF20039A66A /* WeLiiKe */,
+				E408FFBC16A13CF20039A66A /* Frameworks */,
+				E408FFBA16A13CF20039A66A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E408FFBA16A13CF20039A66A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E408FFB916A13CF20039A66A /* WeLiiKe.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E408FFBC16A13CF20039A66A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E408FFBD16A13CF20039A66A /* UIKit.framework */,
+				E408FFBF16A13CF20039A66A /* Foundation.framework */,
+				E408FFC116A13CF20039A66A /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E408FFC316A13CF20039A66A /* WeLiiKe */ = {
+			isa = PBXGroup;
+			children = (
+				E408FFCC16A13CF20039A66A /* AppDelegate.h */,
+				E408FFCD16A13CF20039A66A /* AppDelegate.m */,
+				E408FFC416A13CF20039A66A /* Supporting Files */,
+			);
+			path = WeLiiKe;
+			sourceTree = "<group>";
+		};
+		E408FFC416A13CF20039A66A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E408FFC516A13CF20039A66A /* WeLiiKe-Info.plist */,
+				E408FFC616A13CF20039A66A /* InfoPlist.strings */,
+				E408FFC916A13CF20039A66A /* main.m */,
+				E408FFCB16A13CF20039A66A /* WeLiiKe-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E408FFB816A13CF10039A66A /* WeLiiKe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E408FFD116A13CF20039A66A /* Build configuration list for PBXNativeTarget "WeLiiKe" */;
+			buildPhases = (
+				E408FFB516A13CF10039A66A /* Sources */,
+				E408FFB616A13CF10039A66A /* Frameworks */,
+				E408FFB716A13CF10039A66A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WeLiiKe;
+			productName = WeLiiKe;
+			productReference = E408FFB916A13CF20039A66A /* WeLiiKe.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E408FFB016A13CF10039A66A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = E408FFB316A13CF10039A66A /* Build configuration list for PBXProject "WeLiiKe" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = E408FFAE16A13CF10039A66A;
+			productRefGroup = E408FFBA16A13CF20039A66A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E408FFB816A13CF10039A66A /* WeLiiKe */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E408FFB716A13CF10039A66A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E408FFC816A13CF20039A66A /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E408FFB516A13CF10039A66A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E408FFCA16A13CF20039A66A /* main.m in Sources */,
+				E408FFCE16A13CF20039A66A /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		E408FFC616A13CF20039A66A /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E408FFC716A13CF20039A66A /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E408FFCF16A13CF20039A66A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		E408FFD016A13CF20039A66A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E408FFD216A13CF20039A66A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WeLiiKe/WeLiiKe-Prefix.pch";
+				INFOPLIST_FILE = "WeLiiKe/WeLiiKe-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		E408FFD316A13CF20039A66A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "WeLiiKe/WeLiiKe-Prefix.pch";
+				INFOPLIST_FILE = "WeLiiKe/WeLiiKe-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E408FFB316A13CF10039A66A /* Build configuration list for PBXProject "WeLiiKe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E408FFCF16A13CF20039A66A /* Debug */,
+				E408FFD016A13CF20039A66A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E408FFD116A13CF20039A66A /* Build configuration list for PBXNativeTarget "WeLiiKe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E408FFD216A13CF20039A66A /* Debug */,
+				E408FFD316A13CF20039A66A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E408FFB016A13CF10039A66A /* Project object */;
+}
