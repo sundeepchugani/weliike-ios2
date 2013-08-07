@@ -90,7 +90,8 @@ extern BOOL checkForLogInAndSignUp;
         
         WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(GetAllFriendUserIDHandler:)];
         int countObj=[arrayForCateSelected count]-countSelectedCategory;
-        labelForName.text=[[arrayForCateSelected objectAtIndex:countObj] valueForKey:@"user_category_name"];//510646adf7e4f33e2c000005
+//        labelForName.text=[[arrayForCateSelected objectAtIndex:countObj] valueForKey:@"user_category_name"];//510646adf7e4f33e2c000005
+  labelForName.text=[[arrayForCateSelected objectAtIndex:countObj] valueForKey:@"Sharing"];//
         NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
         [service GetAllFriendUserID:strID];
     }
