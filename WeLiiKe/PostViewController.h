@@ -38,6 +38,8 @@
     NSString *strForLatFourSqaure,*strForLongFourSqaure;
     BOOL checkKeyBoard;
     UIScrollView *scrollViewForPost;
+    UIActivityIndicatorView *activityIndicatorView;
+
 }
 @property(nonatomic,retain)IBOutlet UIScrollView *scrollViewForPost;
 @property(nonatomic,retain)IBOutlet UILabel *lblForWrite;
@@ -48,9 +50,11 @@
 @property(nonatomic,retain)IBOutlet  UITextField *txtField;
 @property(nonatomic,retain)IBOutlet UIImageView *imgView;
 @property(nonatomic,retain)IBOutlet UITextView *txtView;
+@property(nonatomic,retain)IBOutlet UIView *parentView;
 
 @property (strong, nonatomic) FBRequestConnection *requestConnection;
 
+-(void)selectCatogiry;
 -(IBAction)actionOnSelectCategory:(id)sender;
 -(IBAction)actionOnBack:(id)sender;
 -(IBAction)actionOnDone:(id)sender;
