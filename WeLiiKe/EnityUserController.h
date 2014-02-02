@@ -17,6 +17,7 @@
 #import "FollowingViewController.h"
 #import "FriendCloudViewController.h"
 #import "SortingViewController.h"
+#import "TJSpinner.h"
 
 
 @interface EnityUserController :  UIViewController<WETouchableViewDelegate,UITableViewDataSource,UITableViewDelegate>{
@@ -50,7 +51,12 @@
     int page_No;
     NSMutableDictionary *dicForCitySubcate;
     NSMutableArray *arrayForCell;
+    TJSpinner  *spinner;
+    
+ 
 }
+@property(assign)int selectedItmeFromWeLiike;
+@property(nonatomic,retain)IBOutlet TJSpinner  *spinner;
 @property(nonatomic,retain)NSString *strForClass;
 @property(nonatomic,retain)IBOutlet UIView *viewForHeaderBot;
 @property(nonatomic,retain)NSString *strUserID,*strForSearchName;

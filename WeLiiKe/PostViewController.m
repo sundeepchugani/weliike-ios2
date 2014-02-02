@@ -13,46 +13,56 @@
 #import "UIImage+Resize.h"
 #import "Foursquare2.h"
 #import "UIImage+Resize.h"
+#import "SVGeocoder.h"
 
 extern UIImage *imageFinal;
 extern BOOL pushApplyFilter;
+extern NSString *stringForCategoryName;
 NSDictionary *dicForCategorySelected;
+ BOOL B_PostLock;
 
 @implementation PostViewController
+CGFloat fontHeight;
+CGFloat textViewHeight;
 @synthesize imgView,txtView,txtField,btnForSelecte,tableViewForSearchEntity,strForSeletedAppID;
 @synthesize strForAddress,lblForWrite,scrollViewForPost,strForCity,strForSubcategoryName;
-@synthesize parentView;
+@synthesize parentView,btn_Back,ImgView_StarRating,v_BottomView,btn_Share,btn_Done;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        
         // Custom initialization
     }
     return self;
 }
-
-
-//- (void) killHUD
-//{
-//	if(aHUD != nil ){
-//		[aHUD.loadingView removeFromSuperview];
-//        [self.view setUserInteractionEnabled:YES];
-//        aHUD = nil;
-//		[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-//	}
-//}
+- (void) killHUD
+{
+	if(aHUD != nil ){
+		[aHUD.loadingView removeFromSuperview];
+        [self.view setUserInteractionEnabled:YES];
+        aHUD = nil;
+		[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+	}
+}
 //
 ////Initialize and display the progress view
-//- (void) showHUD
-//{
-//	if(aHUD == nil)
-//	{
-//		aHUD = [[HudView alloc]init];
-//        [aHUD loadingViewInView:self.view text:@"Please Wait..."];
-//		[aHUD setUserInteractionEnabledForSuperview:self.view.superview];
-//        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-//    }
-//}
+- (void) showHUD
+{
+	if(aHUD == nil)
+	{
+		aHUD = [[HudView alloc]init];
+        [aHUD loadingViewInView:self.view text:@"Please Wait..."];
+		[aHUD setUserInteractionEnabledForSuperview:self.view.superview];
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    }
+}
+-(void)killActivityindicator{
+    [activityIndicatorView stopAnimating];
+}
+-(void)showActivityindicator{
+    [activityIndicatorView startAnimating];
+}
 
 
 
@@ -78,34 +88,43 @@ NSDictionary *dicForCategorySelected;
     }
     
     dicForCategorySelected=nil;
-    [btnForSelecte setTitle:@"Select category" forState:UIControlStateNormal];
+    [btnForSelecte setTitle:@"Select Category" forState:UIControlStateNormal];
     txtField.text=@"";
-    txtField.placeholder=@"Name......";
+    txtField.placeholder=@"NAME...";
     txtView.text=@"";
     lblForWrite.hidden=NO;
     [customRank setValue:0];
     [[NSUserDefaults standardUserDefaults] setValue:nil forKey:@"captionText"];
     [btnForTakePicture removeFromSuperview];
+    [btnForTakePicture setImage:nil];
     imageFinal=nil;
+     [[[self.tabBarController viewControllers] objectAtIndex:1] popToRootViewControllerAnimated:YES];
     self.tabBarController.selectedIndex=1;
     //[self.tabBarController setTabBarHidden:NO animated:NO];
     [self.tabBarController setTabBarHidden:NO animated:NO completion:NULL];
 }
 -(IBAction)actionOnSelectCategory:(id)sender{
+    
+        ImgView_StarRating.hidden = NO;
+    [activityIndicatorView stopAnimating];
     //[self performSelector:@selector(callItunesWebService:) withObject:@"" afterDelay:0.2];
 //    SelectCategoryViewController *obj=[[SelectCategoryViewController alloc] init];
 //    [self presentModalViewController:obj animated:YES];
+      [txtView resignFirstResponder];
       [txtField resignFirstResponder];
     SelectCategoryViewController *obj=[[SelectCategoryViewController alloc] init];
     [self.parentView addSubview:obj.view];
+    obj.can.hidden=NO;
     CGRect frame = self.parentView.frame;
     [UIView setAnimationDelegate:self];
     [UIView setAnimationDidStopSelector:@selector( animationDidStop:finished:context: )];
     [UIView beginAnimations:@"slideMenu" context:(__bridge void *)(self.parentView)];
+    [UIView setAnimationDelay:0.1];
+    [UIView setAnimationDuration:0.5];
     if (frame.origin.y==0) {
-        frame.origin.y = -460;
+        frame.origin.y = -410;
     }else{
-        frame.origin.y = 0;
+        frame.origin.y = 40;
     }
     self.parentView.frame = frame;
     [UIView commitAnimations];
@@ -116,24 +135,29 @@ NSDictionary *dicForCategorySelected;
 
 
 -(IBAction)actionOnShare:(id)sender{
-    
+    B_Share = true;
     ShareSettingViewController *obj=[[ShareSettingViewController alloc] init];
     [self.navigationController pushViewController:obj animated:YES];
     
 }
 
-- (BOOL)touchesShouldCancelInContentView:(UIView *)view
-{
-    return ![view isKindOfClass:[UIButton class]];
-}
+//- (BOOL)touchesShouldCancelInContentView:(UIView *)view
+//{
+//    return ![view isKindOfClass:[UIButton class]];
+//}
 
 -(IBAction)actionOnDone:(id)sender{
     //
+    if(checkStatus==true)
+    {
+        UIImageWriteToSavedPhotosAlbum(btnForTakePicture.image, nil,nil, nil);
+        //            checkStatus = false;
+    }
    NSString *strForTitle=[btnForSelecte currentTitle];
   if ([btnForTakePicture image]==nil) {
       UIAlertView *errorAlert = [[UIAlertView alloc]
                                  initWithTitle: @"Message"
-                                 message: @"Please selecte image to post."
+                                 message: @"Please upload a picture."
                                  delegate:nil
                                  cancelButtonTitle:@"OK"
                                  otherButtonTitles:nil];
@@ -142,7 +166,7 @@ NSDictionary *dicForCategorySelected;
   }else if ([[btnForSelecte currentTitle] isEqualToString:@"Select category"]){
         UIAlertView *errorAlert = [[UIAlertView alloc]
                                    initWithTitle: @"Message"
-                                   message: @"Please select category to post."
+                                   message: @"Please choose a category"
                                    delegate:nil
                                    cancelButtonTitle:@"OK"
                                    otherButtonTitles:nil];
@@ -153,14 +177,14 @@ NSDictionary *dicForCategorySelected;
       if ([txtField.text length]==0) {
           UIAlertView *errorAlert = [[UIAlertView alloc]
                                      initWithTitle: @"Message"
-                                     message: @"Please selecte entity name to post."
+                                     message: @"Please enter a name for your post"
                                      delegate:nil
                                      cancelButtonTitle:@"OK"
                                      otherButtonTitles:nil];
           [errorAlert show];
       }else{
-//          [self showHUD];
-          [activityIndicatorView startAnimating];
+          [self showHUD];
+//          [activityIndicatorView startAnimating];
           //[self performSelector:@selector(callService) withObject:nil afterDelay:0.0];
           [self performSelector:@selector(callService) withObject:nil afterDelay:0.5];
       }
@@ -170,8 +194,8 @@ NSDictionary *dicForCategorySelected;
     }else{
         strForSeletedAppID=@"";
         strForSubcategoryName=@"";
-//        [self showHUD];
-         [activityIndicatorView startAnimating];
+        [self showHUD];
+        // [activityIndicatorView startAnimating];
         //[self performSelector:@selector(callService) withObject:nil afterDelay:0.0];
         [self performSelector:@selector(callService) withObject:nil afterDelay:0.5];
     }
@@ -198,11 +222,15 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     visibleRect.size.height = scrollViewTakePhoto.bounds.size.height * scale;
     
     NSLog(@"**************%@", NSStringFromCGRect(visibleRect));
-    UIImage *img1=btnForTakePicture.image;
+     UIImage *img2=btnForTakePicture.image;
+     UIImage* cropped = imageFromView(img2, &visibleRect);
+     UIImage *img1=cropped;
     if (img1==nil) {
         img1=[btnForTakePicture image];
     }
-    NSString *strForCaption=txtView.text;
+    NSString *strForCaption=[txtView.text stringByReplacingOccurrencesOfString:@";" withString:@""] ;
+    
+    NSLog(@"star caption = %@", strForCaption);
     NSMutableDictionary *dic=[[NSMutableDictionary alloc] init];
     [dic setValue:img1 forKey:@"image"];
     [dic setValue:strForCaption forKey:@"caption"];
@@ -276,19 +304,29 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
         
         [array addObject:[[appDelegate.arrayOfUserForMessage objectAtIndex:i] valueForKey:@"user_id"]];
     }
-    
+    NSLog(@"defaulf image  = = == =   = %d", appDelegate.B_defualf);
     NSString *strForUserIDToShare=[array componentsJoinedByString:@","];
     [txtView resignFirstResponder];
-    [txtField resignFirstResponder];
-    [service saveMedia:txtField.text comment:strForCaption address:strForAddress lat:strForlate longitude:strForlong master_category_id:[dicForCategorySelected valueForKey:@"master_category_id"] entity_image:strBase user_id:strID user_category_id:[dicForCategorySelected valueForKey:@"user_category_id"] api_id:strForSeletedAppID rating_count:[NSString stringWithFormat:@"%d",(int)customRank.value] group_id:[[NSUserDefaults standardUserDefaults] valueForKey:@"GroupIdToShare"] email:strEmai receiver_id:strForUserIDToShare feed:[[NSUserDefaults standardUserDefaults] valueForKey:@"newsfeedshare"] sub_category:strForSubcategoryName city:strForCity];
+    [txtField resignFirstResponder];  
+
+    [SVGeocoder reverseGeocode:CLLocationCoordinate2DMake(strForlate.floatValue, strForlong.floatValue)
+                    completion:^(NSArray *placemarks, NSHTTPURLResponse *urlResponse, NSError *error) {
+                        NSLog(@"placemarks = %@", placemarks);
+                        
+                        strForCity = [[placemarks valueForKey:@"subAdministrativeArea"]objectAtIndex:0];
+                        
+                    }];
+    NSLog(@"string for city name = = = = = %d", B_PostLock);
+    [service saveMedia:txtField.text comment:strForCaption address:strForAddress lat:strForlate longitude:strForlong master_category_id:[dicForCategorySelected valueForKey:@"master_category_id"] entity_image:strBase user_id:strID user_category_id:[dicForCategorySelected valueForKey:@"user_category_id"] api_id:strForSeletedAppID rating_count:[NSString stringWithFormat:@"%d",(int)customRank.value] group_id:[[NSUserDefaults standardUserDefaults] valueForKey:@"GroupIdToShare"] email:strEmai receiver_id:strForUserIDToShare feed:[[NSUserDefaults standardUserDefaults] valueForKey:@"newsfeedshare"] sub_category:strForSubcategoryName city:strForCity def:appDelegate.B_defualf is_active:B_PostLock];
    // NSLog(@"value of savemedia response %@",strForResponce);
         //******************[btnForTakePicture setBackgroundImage:nil forState:UIControlStateNormal];
 }
 
+
 -(void)saveMediaHandler:(id)sender{
     
-//    [self killHUD];
-      [activityIndicatorView stopAnimating];
+    [self killHUD];
+     // [activityIndicatorView stopAnimating];
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
                                    initWithTitle: @"Error"
@@ -311,10 +349,11 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
             if ([appDelegate.arrayOfUserForMessage count]>0) {
                 [appDelegate.arrayOfUserForMessage removeAllObjects];
             }
+             [btnForTakePicture setImage:nil];
             dicForCategorySelected=nil;
             [btnForSelecte setTitle:@"Select category" forState:UIControlStateNormal];
             txtField.text=@"";
-            txtField.placeholder=@"Name......";
+            txtField.placeholder=@"NAME...";
             txtView.text=@"";
             lblForWrite.hidden=NO;
             [customRank setValue:0];
@@ -324,6 +363,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
             if ([strForResponce count]>0) {
                 //[self performSelector:@selector(moveNextScreen)];
                 dicForCategorySelected=nil;
+                [[[self.tabBarController viewControllers] objectAtIndex:1] popToRootViewControllerAnimated:YES];
                 self.tabBarController.selectedIndex=1;
                 [self.tabBarController setTabBarHidden:NO animated:NO completion:NULL];
 //                UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -333,6 +373,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 //                                           cancelButtonTitle:@"OK"
 //                                           otherButtonTitles:nil];
 //                [errorAlert show];
+               
                 
                 
             }else{
@@ -534,10 +575,33 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    NSLog(@"string for category name %@",stringForCategoryName );
+    if(stringForCategoryName.length==0){
+        SelectCategoryViewController *obj=[[SelectCategoryViewController alloc] init];
+        [self.parentView addSubview:obj.view];
+        CGRect frame = self.parentView.frame;
+        if (frame.origin.y==0) {
+            frame.origin.y = -410;
+        }else{
+            frame.origin.y = 40;
+        }
+        self.parentView.frame = frame;
+        [UIView commitAnimations];
+    }
+
+     B_PostLock = true;
+    
+       UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
+                                   initWithTarget:self
+                                   action:@selector(dismissKeyboard)];
+    
+    [self.scrollViewForPost addGestureRecognizer:tap];
+//    [self.imgView setImage:[UIImage imageNamed:@"fb_post.png"]];
+    [self.imgView addGestureRecognizer:tap];
     txtView.delegate=self;
     txtView.layer.cornerRadius=4.0;
     txtView.layer.masksToBounds=YES;
-    txtView.layer.borderWidth=2.0;
+    txtView.layer.borderWidth=0;
     txtView.layer.borderColor=[UIColor colorWithRed:51.0/255.0 green:170.0/255.0 blue:255.0/255.0 alpha:1.0].CGColor;
     selectedCategory=0;
     
@@ -552,7 +616,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     scrollViewTakePhoto.delegate=self;
     [scrollViewTakePhoto setShowsHorizontalScrollIndicator:NO];
     [scrollViewTakePhoto setShowsVerticalScrollIndicator:NO];
-    [scrollViewForPost addSubview:scrollViewTakePhoto];
+      [scrollViewForPost addSubview:scrollViewTakePhoto];
     
     UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
     
@@ -561,11 +625,10 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     //UITapGestureRecognizer *singleTap1 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
     //[scrollViewForPost addGestureRecognizer:singleTap1];
 
-
     
-    UIImageView *imageTouch=[[UIImageView alloc] initWithFrame:CGRectMake(295, 240, 20, 30)];
+    UIImageView *imageTouch=[[UIImageView alloc] initWithFrame:CGRectMake(280, 210, 30, 23)];
     [imageTouch setImage:[UIImage imageNamed:@"hand.png"]];
-    //[self.view addSubview:imageTouch];
+    [self.scrollViewForPost addSubview:imageTouch];
     
     arrayForEntitySearch=[[NSMutableArray alloc] init];
     tableViewForSearchEntity=[[UITableView alloc] initWithFrame:CGRectMake(0, 80, 320, 390)];
@@ -575,25 +638,202 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     [self.view addSubview:tableViewForSearchEntity];
     
     
-    [scrollViewForPost setContentSize:CGSizeMake(320, 450)];
+    [scrollViewForPost setContentSize:CGSizeMake(320, 410)];
     scrollViewForPost.userInteractionEnabled = YES;
-    scrollViewForPost.exclusiveTouch = YES;
+    //scrollViewForPost.exclusiveTouch = YES;
     parentView = [[UIView alloc]initWithFrame:CGRectMake(0, -460, 320, 460)];
     [self.view addSubview:parentView];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(selectCategory)
                                                  name:@"selectCategory" object:nil];
-    activityIndicatorView = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+      activityIndicatorView = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     activityIndicatorView.frame = CGRectMake(0, 0, 90, 90);
     activityIndicatorView.center = self.view.center;
     [self.view addSubview:activityIndicatorView];
+    [btnForTakePicture setBackgroundColor:[UIColor lightGrayColor]];
+    UITapGestureRecognizer *gestureOnbackbutton = [[UITapGestureRecognizer alloc]
+                                                   initWithTarget:self
+                                                   action:@selector(actionOnBack:)];
+    gestureOnbackbutton.numberOfTapsRequired=1;
+    [btn_Back addGestureRecognizer:gestureOnbackbutton];
+    UITapGestureRecognizer *gestureOnDonebutton = [[UITapGestureRecognizer alloc]
+                                                   initWithTarget:self
+                                                   action:@selector(actionOnDone:)];
+    gestureOnDonebutton.numberOfTapsRequired=1;
+    [btn_Done addGestureRecognizer:gestureOnDonebutton];
+    UITapGestureRecognizer *gestureOnSharebutton = [[UITapGestureRecognizer alloc]
+                                                   initWithTarget:self
+                                                   action:@selector(actionOnShare:)];
+    gestureOnSharebutton.numberOfTapsRequired=1;
+    [btn_Share addGestureRecognizer:gestureOnSharebutton];
     // Do any additional setup after loading the view from its nib.
 }
+-(void)viewWillAppear:(BOOL)animated{
 
+     if(stringForCategoryName.length==0 && !B_Share){
+        SelectCategoryViewController *obj=[[SelectCategoryViewController alloc] init];
+         [self.parentView addSubview:obj.view];
+        CGRect frame = self.parentView.frame;
+        if (frame.origin.y==0) {
+            frame.origin.y = -410;
+        }else{
+            frame.origin.y = 40;
+        }
+        self.parentView.frame = frame;
+        [UIView commitAnimations];
+//       stringForCategoryName = @"";
+   }
+    checkStatus =   [[[NSUserDefaults standardUserDefaults] valueForKey:@"swichOnOffStatus"] boolValue];
+    NSLog(@"status  = = = = = =  = = = = = = = = %d", checkStatus);
+     [activityIndicatorView stopAnimating];
+    [self.view endEditing:YES];
+    [txtView resignFirstResponder];
+    if(B_Share){
+        [scrollViewForPost setContentSize:CGSizeMake(320, (410+txtView.frame.size.height))];
+//          [scrollViewForPost setContentSize:CGSizeMake(320, 410+txtView.contentSize.height)];
+        
+        B_Share = false;
+    }
+    [scrollViewForPost setContentOffset:CGPointMake(0, 0) animated:YES];
+    [btn_Share setFrame:CGRectMake(256, 260, 54, 24)];
+    [self.tabBarController setTabBarHidden:YES animated:NO completion:NULL];
+    
+    AppDelegate *delegate=(AppDelegate *)[UIApplication sharedApplication].delegate;
+    delegate.btnPost.hidden = YES;
+    strForAddress=delegate.strForAddressDelegate;
+    [self performSelector:@selector(getAddressLocation) withObject:nil afterDelay:0.5];
+    self.navigationController.navigationBar.hidden=YES;
+    
+    if (pushApplyFilter) {
+        pushApplyFilter=NO;
+        
+        ApplyFilterViewController *filObj=[[ApplyFilterViewController alloc] init];
+        filObj.imageOrg=[imageFinal copy];//[imageFinal thumbnailImage:640 transparentBorder:0 cornerRadius:0 interpolationQuality:kCGInterpolationHigh];
+        //filObj.imageOrg=[image copy];
+        [self.navigationController pushViewController:filObj animated:YES];
+        
+        //        CropViewController *obj=[[CropViewController alloc] init];
+        //        obj.imgSet=[imageFinal copy];
+        //        obj.delegate=self;
+        //        obj.sizeForCrop=CGRectMake(1, 100, 318, 250);
+        //        [self.navigationController pushViewController:obj animated:YES];
+        return;
+    }
+    
+   
+        if (btnForTakePicture!=nil) {
+            [btnForTakePicture removeFromSuperview];
+        }
+        if (imageFinal!=nil) {
+        btnForTakePicture=[[UIImageView alloc] initWithImage:imageFinal];
+             [scrollViewTakePhoto setScrollEnabled:YES];
+        }
+        UIImage *imageload=[btnForTakePicture image];
+    CGFloat imageWidth = imageload.size.width;
+    CGFloat imageHeight = imageload.size.height;
+    
+    int scrollWidth = scrollViewTakePhoto.frame.size.width;
+    int scrollHeight = scrollViewTakePhoto.frame.size.height;
+    
+    float scaleX = scrollWidth / imageWidth;
+    float scaleY = scrollHeight / imageHeight;
+    float scaleScroll =  (scaleX < scaleY ? scaleY : scaleX);
+    //scrollViewTakePhoto.bounds = CGRectMake(0, 0,imageWidth , imageHeight );
+    scrollViewTakePhoto.contentSize = imageload.size;
+    scrollViewTakePhoto.maximumZoomScale = scaleScroll*3;
+    scrollViewTakePhoto.minimumZoomScale = scaleScroll;
+    scrollViewTakePhoto.zoomScale = scaleScroll;
+   
+    
+       if (imageload==nil) {
+        imageload=[UIImage imageNamed:@"placeholderImage.png"];
+           btnForTakePicture=[[UIImageView alloc] initWithImage:imageload];
+          [btnForTakePicture setFrame:CGRectMake(0, 0, 320, 200)];
+         scrollViewTakePhoto.contentSize = CGSizeMake(320, 200);
+           [scrollViewTakePhoto setScrollEnabled:NO];
+       }
+         [scrollViewTakePhoto addSubview:btnForTakePicture];
+        //btnForTakePicture=[[UIImageView alloc] initWithImage:imageload];//welike_screen5
+       
+    if (dicForCategorySelected==nil) {
+        [self performSelector:@selector(callSelect) withObject:nil afterDelay:0.3];
+    }else{
+        
+        if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Books"]) {
+            //Book
+            selectedCategory=0;
+            txtField.returnKeyType = UIReturnKeySearch;
+            
+        }else if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Restaurants"]) {
+            //Restaurant
+            selectedCategory=1;
+            txtField.returnKeyType = UIReturnKeySearch;
+            
+        }else if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Music"]) {
+            //Music
+            selectedCategory=2;
+            txtField.returnKeyType = UIReturnKeySearch;
+            
+        }else if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Movies & TV"]) {
+            //Movie & TV
+            selectedCategory=3;
+            txtField.returnKeyType = UIReturnKeySearch;
+            
+        }else if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Apps & Games"]) {
+            //Apps & Games
+            selectedCategory=4;
+            txtField.returnKeyType = UIReturnKeySearch;
+        }else if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Bars & Nightlife"]) {
+            //Bars & Nightlife
+            selectedCategory=1;
+            txtField.returnKeyType = UIReturnKeySearch;
+        }else if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Places & Activities"]) {
+            //Places & Activities
+            selectedCategory=1;
+            txtField.returnKeyType = UIReturnKeySearch;
+        }
+        
+        
+        [btnForSelecte setTitle:[dicForCategorySelected valueForKey:@"master_category_name"] forState:UIControlStateNormal];
+    }
+   
+    if ([txtView.text length]>80) {
+        CGRect newTextFrame = txtView.frame;
+        newTextFrame.size = txtView.contentSize;
+        [customRank setFrame:CGRectMake(40,(txtView.contentSize.height-28)+318 ,240, 40)];
+        //    customRank=[[CustomStarRank alloc] initWithFrame:CGRectMake(40,(textView.contentSize.height-34)+318 ,240, 40)];
+        [btn_Back setFrame:CGRectMake(btn_Back.frame.origin.x, (txtView.contentSize.height-34)+364, btn_Back.frame.size.width, btn_Back.frame.size.height)];
+        [btn_Done setFrame:CGRectMake(btn_Done.frame.origin.x, (txtView.contentSize.height-34)+364, btn_Done.frame.size.width, btn_Done.frame.size.height)];
+        [ImgView_StarRating setFrame:CGRectMake(ImgView_StarRating.frame.origin.x, (txtView.contentSize.height-34)+323, ImgView_StarRating.frame.size.width, ImgView_StarRating.frame.size.height)];
+        [v_BottomView setFrame:CGRectMake(0, (txtView.contentSize.height-34)+318, 320, 87)];
+        [btn_Share setFrame:CGRectMake(255, (txtView.contentSize.height+240), 54, 25)];
+        newTextFrame.size.height = newTextFrame.size.height + fontHeight;
+        
+        
+        txtView.frame = newTextFrame;
+        textViewHeight = txtView.frame.size.height;
+        [scrollViewForPost setContentSize:CGSizeMake(320, 410+txtView.contentSize.height)];
+        [scrollViewForPost setContentOffset:CGPointMake(0, 200+txtView.contentSize.height) animated:YES];
+
+    }    
+}
 -(void)viewWillDisappear:(BOOL)animated
 {
-    
+    if(B_Share){
+//        B_Share = false;
+         [scrollViewForPost setContentSize:CGSizeMake(320, (410+txtView.frame.size.height+fontHeight))];
+        [scrollViewForPost setContentOffset:CGPointMake(320, (410+txtView.frame.size.height+fontHeight)) animated:YES];
+    }
+    else{
+        [btn_Back setFrame:CGRectMake(btn_Back.frame.origin.x, 364, btn_Back.frame.size.width, btn_Back.frame.size.height)];
+        [btn_Done setFrame:CGRectMake(btn_Done.frame.origin.x, 364, btn_Done.frame.size.width, btn_Done.frame.size.height)];
+        [ImgView_StarRating setFrame:CGRectMake(ImgView_StarRating.frame.origin.x, 323, ImgView_StarRating.frame.size.width, ImgView_StarRating.frame.size.height)];
+    [txtView setFrame:CGRectMake(9,255, 301, 62)];
+     [v_BottomView setFrame:CGRectMake(0,318, 320, 95)];
+     [scrollViewForPost setContentSize:CGSizeMake(320, 410)];
+    [customRank setFrame:CGRectMake(40, 324,240, 40)];
+    }
 //	[[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
 //    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
 //    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
@@ -604,7 +844,9 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 -(void)keyboardWillShow:(NSNotification*)noti{
     
     if (checkKeyBoard==YES) {
-
+    [scrollViewForPost setContentSize:CGSizeMake(320, (410+220+txtView.frame.size.height))];
+          [scrollViewForPost setContentOffset:CGPointMake(0, 220+fontHeight) animated:YES];
+        NSLog(@"total content size = = = = %f", (txtView.frame.size.height+180+410));
     UIView *viewForReturn=[[UIView alloc] initWithFrame:CGRectMake(240+2-3, 174-5, 78-10+10+5, 38+10)];
     [viewForReturn setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"KeyPadBackgroundColor.png"]]];
     viewForReturn.userInteractionEnabled=YES;
@@ -650,18 +892,35 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     }
   }
 }
+-(void)dismissKeyboard {
+    [txtView resignFirstResponder];
+    [txtField resignFirstResponder];
+    if(txtView.text==0){
+        [scrollViewForPost setContentSize:CGSizeMake(320, (410))];
+        [scrollViewForPost setContentOffset:CGPointMake(0, 0) animated:YES];
+    }
+    else{
+     [scrollViewForPost setContentSize:CGSizeMake(320, (410+fontHeight+textViewHeight)-60)];
+    [scrollViewForPost setContentOffset:CGPointMake(0, 0) animated:YES];
+    }
+}
 
 -(void)actionOnKeyBoard:(UIButton *)btn{
     //AudioServicesPlaySystemSound(0x450);
     lblForWrite.hidden=YES;
     if (btn.tag==1) {
         NSString *strForInput=[NSString stringWithFormat:@"%@@",txtView.text];
+        [self.txtView setTextColor:[UIColor blueColor] ];
         txtView.text=strForInput;
         //isPrevious=YES;
     }else if (btn.tag==2){
         NSString *strForInput=[NSString stringWithFormat:@"%@#",txtView.text];
+        [self.txtView setTextColor:[UIColor blueColor] ];
         txtView.text=strForInput;
         //isPrevious=NO;
+    }
+    else{
+        NSLog(@"I m here");
     }
     
 }
@@ -679,9 +938,20 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     }else{
         NSLog(@"sinlgeTap called");
         [self.view endEditing:YES];
-        CameraViewController *myViewController = [[CameraViewController alloc] init];
-        [self presentModalViewController:myViewController animated:YES];
+//        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
 
+        if(keyBordUp)
+        {
+             [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
+            keyBordUp = false;
+        }
+        else{
+            CameraViewController *myViewController = [[CameraViewController alloc] init];
+            myViewController.dicForAllMasterCategory = [dicForCategorySelected copy];
+            [self presentModalViewController:myViewController animated:YES];
+
+        }
+     
     }
     
 
@@ -709,10 +979,18 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
         cellSug = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier1];
     }
     cellSug.selectionStyle=UITableViewCellSelectionStyleNone;
-    cellSug.textLabel.text=@"can't find entity?";//suggest_btn
+    UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(10.0f,15.0f, 150.0f, 20.0f)];
+    [lbl setText:@"can't find it?"];
+//    [[lbl setFont ]UIFont systemFontOfSize:16];
+    lbl.font = [UIFont systemFontOfSize:16];
+    lbl.textColor = [UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0];
+
+//    cellSug.textLabel.text=@"can't find it?";//suggest_btn
+  
+   
     [cellSug.textLabel setFont:[UIFont systemFontOfSize:16]];;
     [cellSug.textLabel setTextColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0]];
-    
+      [cellSug addSubview:lbl];
     UIImageView *imgeSug=[[UIImageView alloc] initWithFrame:CGRectMake(150, 10, 150, 30)];
     [imgeSug setImage:[UIImage imageNamed:@"suggest_btn.png"]];
     [cellSug addSubview:imgeSug];
@@ -749,11 +1027,11 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
         NSDictionary *dicForLocation=[[arrayForEntitySearch objectAtIndex:index] valueForKey:@"location"];
         NSArray *iconImg;
         
-
+        
         if ([arrayForCate count]>0) {
             iconImg= [[arrayForCate objectAtIndex:0] valueForKey:@"icon"];
         }
-                NSString *iconUrl = [iconImg valueForKey:@"prefix"];
+        NSString *iconUrl = [iconImg valueForKey:@"prefix"];
         if ([iconUrl length] != 0) {
             if ([iconUrl hasSuffix:@"_"]) {
                 NSRange range = NSMakeRange([iconUrl length]-1,1);
@@ -762,7 +1040,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
                 [cell.imgForEntity setBackgroundColor:[UIColor clearColor]];
             }
         }
-
+        
         NSString *strForAddress1=@"";
         if ([dicForLocation valueForKey:@"city"]==nil && [dicForLocation valueForKey:@"country"]==nil) {
             strForAddress1=[NSString stringWithFormat:@"%@",[dicForLocation valueForKey:@"address"]];
@@ -771,11 +1049,11 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
         }else if ([dicForLocation valueForKey:@"address"]==nil) {
             strForAddress1=[NSString stringWithFormat:@"%@ %@",[dicForLocation valueForKey:@"city"],[dicForLocation valueForKey:@"country"]];
         }else{
-           strForAddress1=[NSString stringWithFormat:@"%@ %@ %@",[dicForLocation valueForKey:@"address"],[dicForLocation valueForKey:@"city"],[dicForLocation valueForKey:@"country"]];
+            strForAddress1=[NSString stringWithFormat:@"%@ %@ %@",[dicForLocation valueForKey:@"address"],[dicForLocation valueForKey:@"city"],[dicForLocation valueForKey:@"country"]];
         }
         //cell.textLabel.text=[[arrayForEntitySearch objectAtIndex:index] valueForKey:@"name"];
         //if ([strForUrl hasPrefix:@"http://"]) {
-           
+        
         //}
         [cell.lblForEntityName setFont:[UIFont boldSystemFontOfSize:15]];
         cell.lblForEntityName.text=[[arrayForEntitySearch objectAtIndex:index] valueForKey:@"name"];
@@ -796,12 +1074,12 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
         }
         
         cell.lblForEntityDisc.text=[[arrayForEntitySearch objectAtIndex:index] valueForKey:@"primaryGenreName"];
-    }    
+    }
 	return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-   
+    
     if (indexPath.row==[arrayForEntitySearch count]) {
         tableViewForSearchEntity.hidden=YES;
         
@@ -811,10 +1089,10 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
         
         return;
     }
-
+    
     if (indexPath.row<[arrayForEntitySearch count]) {
         
-        btnForTakePicture.image=nil;
+//        btnForTakePicture.image=nil;
         if ([[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Books"] || [[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Music"] ||[[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Movies & TV"] ||[[dicForCategorySelected valueForKey:@"master_category_name"] isEqualToString:@"Apps & Games"] ) {
             //Book
             //selectedCategory=0;
@@ -832,8 +1110,8 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
                     [unescapedString replaceOccurrencesOfString:@"100x100" withString:@"600x600" options:0 range:NSMakeRange(0, [unescapedString length])];
                 }
                 
-//                [self showHUD];
-               [activityIndicatorView startAnimating];
+                [self showHUD];
+                //               [activityIndicatorView startAnimating];
                 [self performSelector:@selector(loadImageFromURL:) withObject:unescapedString afterDelay:0.2];
             }
             
@@ -849,7 +1127,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
                 NSArray *arrayGenres=[[arrayForEntitySearch objectAtIndex:indexPath.row] valueForKey:@"genres"];
                 
                 strForSubcategoryName=[arrayGenres componentsJoinedByString:@" "];
-
+                
             }else {
                 strForSubcategoryName=[NSString stringWithFormat:@"%@",[[arrayForEntitySearch objectAtIndex:indexPath.row] valueForKey:@"primaryGenreName"]];
             }
@@ -863,7 +1141,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
             if (btnForTakePicture!=nil) {
                 [btnForTakePicture removeFromSuperview];
             }
-
+            
             
             selectedCategory=1;
             txtField.text=[[arrayForEntitySearch objectAtIndex:indexPath.row] valueForKey:@"name"];
@@ -903,8 +1181,8 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
                                        if ([items count]>0) {
                                            
                                            NSString *strForUrl=[NSString stringWithFormat:@"%@%@x%@%@",[[items objectAtIndex:0] valueForKey:@"prefix"],[[items objectAtIndex:0] valueForKey:@"width"],[[items objectAtIndex:0] valueForKey:@"height"],[[items objectAtIndex:0] valueForKey:@"suffix"]];
-//                                           [self showHUD];
-                                            [activityIndicatorView startAnimating];
+                                           [self showHUD];
+//                                            [activityIndicatorView startAnimating];
                                            [self performSelector:@selector(loadImageFromURL:) withObject:strForUrl afterDelay:0.2];
                                        }else{
                                        [self performSelector:@selector(loadDefualtImage)];
@@ -962,13 +1240,13 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     scrollViewTakePhoto.minimumZoomScale = scaleScroll;
     scrollViewTakePhoto.zoomScale = scaleScroll;
     [scrollViewTakePhoto addSubview:btnForTakePicture];
-    
+     [scrollViewTakePhoto setScrollEnabled:NO];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (indexPath.row==0) {
-        return 50;
-    }
+//    if (indexPath.row==0) {
+//        return 50;
+//    }
     return 75;
 }
 
@@ -1000,24 +1278,26 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     scrollViewTakePhoto.maximumZoomScale = scaleScroll*3;
     scrollViewTakePhoto.minimumZoomScale = scaleScroll;
     scrollViewTakePhoto.zoomScale = scaleScroll;
+      
     [scrollViewTakePhoto addSubview:btnForTakePicture];
-    
+     [scrollViewTakePhoto setScrollEnabled:YES];
+       
     }else{
         [self performSelector:@selector(loadDefualtImage)];
         UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Error" message:@"Error to load image" delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles: nil];
         [alert show];
         
     }
-//    [self killHUD];
-      [activityIndicatorView stopAnimating];
+    [self killHUD];
+//      [activityIndicatorView stopAnimating];
 }
 
 
 /****** UIScrollView delegate for zooming **********/
-- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
-{
-    return btnForTakePicture;
-}
+//- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
+//{
+//    return btnForTakePicture;
+//}
 /**************************************************/
 
 
@@ -1025,7 +1305,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     if ([text isEqual:@"\n"]) {
         if ([txtView.text length]==0) {
             lblForWrite.hidden=NO;
-        }
+    }
         [textView resignFirstResponder];
         return NO;
     }else if ([txtView.text length]==1 && [text isEqualToString:@""]){
@@ -1035,28 +1315,63 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     }
     return YES;
 }
+- (void)textViewDidChange:(UITextView *)textView{
+    fontHeight = (textView.font.ascender - textView.font.descender) + 1;
+    CGRect newTextFrame = textView.frame;
+    newTextFrame.size = textView.contentSize;
+    [customRank setFrame:CGRectMake(40,(textView.contentSize.height-28)+318 ,240, 40)];
+//    customRank=[[CustomStarRank alloc] initWithFrame:CGRectMake(40,(textView.contentSize.height-34)+318 ,240, 40)];
+    [btn_Back setFrame:CGRectMake(btn_Back.frame.origin.x, (textView.contentSize.height-34)+364, btn_Back.frame.size.width, btn_Back.frame.size.height)];
+    [btn_Done setFrame:CGRectMake(btn_Done.frame.origin.x, (textView.contentSize.height-34)+364, btn_Done.frame.size.width, btn_Done.frame.size.height)];
+    [ImgView_StarRating setFrame:CGRectMake(ImgView_StarRating.frame.origin.x, (textView.contentSize.height-34)+323, ImgView_StarRating.frame.size.width, ImgView_StarRating.frame.size.height)];
+     [btn_Share setFrame:CGRectMake(250, (textView.contentSize.height-70)+315, 54, 25)];
+    [v_BottomView setFrame:CGRectMake(0, (textView.contentSize.height-34)+318, 320, 87)];
+    // [btn_Share setFrame:CGRectMake(255, (textView.contentSize.height+240), 54, 25)];
+    newTextFrame.size.height = newTextFrame.size.height + fontHeight;
+   
+   
+    txtView.frame = newTextFrame;
+    textViewHeight = txtView.frame.size.height;
+    [scrollViewForPost setContentSize:CGSizeMake(320, 630+textView.contentSize.height)];
+     [scrollViewForPost setContentOffset:CGPointMake(0, 200+textView.contentSize.height) animated:YES];
+//    newTextFrame.origin.y = newTextFrame.origin.y-20;
+ 
+   
+    
+}
 - (void)textViewDidBeginEditing:(UITextView *)textView{
 
     lblForWrite.hidden=YES;
     checkKeyBoard=YES;
+    
     [txtField resignFirstResponder];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:@"KeyBoardHide" object:nil];
-    [scrollViewForPost setContentSize:CGSizeMake(320, 630)];
-    [scrollViewForPost setContentOffset:CGPointMake(0, 220) animated:YES];
+//    [scrollViewForPost setContentSize:CGSizeMake(320, (410+fontHeight+40))];
+//    [scrollViewForPost setContentOffset:CGPointMake(0, 220) animated:YES];
     
-
+//[btn_Share setFrame:CGRectMake(250, 330-220, 54, 25)];
 }
 - (void)textViewDidEndEditing:(UITextView *)textView{
    //lblForWrite.hidden=NO;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
-    [scrollViewForPost setContentSize:CGSizeMake(320, 460)];
-    [scrollViewForPost setContentOffset:CGPointMake(0, 0) animated:YES];
+   
+    
+        [scrollViewForPost setContentSize:CGSizeMake(320, (410+fontHeight+80))];
+     [scrollViewForPost setContentOffset:CGPointMake(0, 0) animated:YES];
+    
 
 }
+
+- (BOOL)touchesShouldCancelInContentView:(UIView *)view
+{
+    return ![view isKindOfClass:[UIButton class]];
+}
+
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
+     [scrollViewForPost setContentSize:CGSizeMake(320, 410)];
     [txtView resignFirstResponder];
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:UIKeyboardDidShowNotification
@@ -1067,7 +1382,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
                                                   object:nil];
 }
 -(void)keyboardWillHide:(NSNotification*)noti{
-    
+     [scrollViewForPost setContentOffset:CGPointMake(0, 220+txtView.frame.size.height) animated:YES];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardShow" object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
     
@@ -1085,25 +1400,18 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField{
-
+    keyBordUp = true;
     checkKeyBoard=NO;
     [txtView resignFirstResponder];
     [txtField becomeFirstResponder];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
-    
 }
 - (void)textFieldDidEndEditing:(UITextField *)textField{
 
     
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:@"KeyBoardHide" object:nil];
+[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:@"KeyBoardHide" object:nil];
+//    [activityIndicatorView startAnimating];
 }
-
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
-
-    [self.view endEditing:YES];
-}
-
 -(void)showAlert{
   
     UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Message" message:@"Please select category." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles: nil];
@@ -1112,18 +1420,33 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    if(textField.text.length>1 )
+    {
+        if ([dicForCategorySelected count]==0) {
+//             [self performSelector:@selector(showAlert)];
+        }
+        else if ([[dicForCategorySelected valueForKey:@"master_category_name"]  isEqualToString:@"Places & Activities"]|| [[dicForCategorySelected valueForKey:@"master_category_name"]  isEqualToString:@"Bars & Nightlife"]|| [[dicForCategorySelected valueForKey:@"master_category_name"]  isEqualToString:@"Apps & Games"]|| [[dicForCategorySelected valueForKey:@"master_category_name"]  isEqualToString:@"Movies & TV"]|| [[dicForCategorySelected valueForKey:@"master_category_name"]  isEqualToString:@"Music"] || [[dicForCategorySelected valueForKey:@"master_category_name"]  isEqualToString:@"Restaurants"]||[[dicForCategorySelected valueForKey:@"master_category_name"]  isEqualToString:@"Books"])
+        {
+                [activityIndicatorView startAnimating];
+        }
+
     
+    }
+    else{
+        [activityIndicatorView stopAnimating];
+    }
     NSString *strForTitle=[btnForSelecte currentTitle];
     if ([strForTitle isEqualToString:@"Apps & Games"]|| [strForTitle isEqualToString:@"Music"]|| [strForTitle isEqualToString:@"Books"]|| [strForTitle isEqualToString:@"Movies & TV"]|| [strForTitle isEqualToString:@"Restaurants"] || [strForTitle isEqualToString:@"Bars & Nightlife"]||[strForTitle isEqualToString:@"Places & Activities"]){
         
         if ([textField.text length]>1) {
+            
 //            if ([arrayForEntitySearch count]>0) {
 //                [arrayForEntitySearch removeAllObjects];
 //            }
             //[tableViewForSearchEntity reloadData];
             tableViewForSearchEntity.hidden=NO;
 //            [self showHUD];
-              [activityIndicatorView startAnimating];
+//              [activityIndicatorView startAnimating];
             if ([strForTitle isEqualToString:@"Apps & Games"]|| [strForTitle isEqualToString:@"Music"]|| [strForTitle isEqualToString:@"Books"]|| [strForTitle isEqualToString:@"Movies & TV"]) {
                 
                 
@@ -1135,27 +1458,6 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
                 AppDelegate *delegate=(AppDelegate *)[UIApplication sharedApplication].delegate;
                 NSString *strForlate=[NSString stringWithFormat:@"%f",delegate.currentLatitude];
                 NSString *strForlong=[NSString stringWithFormat:@"%f",delegate.currentLongitute];
-                
-                
-//                [Foursquare2 searchVenuesNearByLatitude:strForlate longitude:strForlong accuracyLL:@"1" altitude:@"0" accuracyAlt:@"1" query:textField.text limit:@"20" intent:@"" version:@"20130211" callback:^(BOOL success,id result){
-//                    if (success) {
-//                        
-//                        arrayForEntitySearch = [[[result objectForKey:@"response"] objectForKey:@"venues"] copy];
-//                        NSLog(@"value of array %@",arrayForEntitySearch);
-//                        // if ([arrayForEntitySearch count]>0) {
-//                        [tableViewForSearchEntity reloadData];
-//                        //}
-//                        [self performSelector:@selector(killHUD) withObject:nil afterDelay:1];
-//                        
-//                    }else {
-//                        [self performSelector:@selector(killHUD) withObject:nil afterDelay:1];
-//                    }
-//                    
-//                }];
-                
-                
-                //*************************************************************
-                
                
                 NSString *strForCategoryID=@"";
                 if ([strForTitle isEqualToString:@"Restaurants"]) {
@@ -1185,10 +1487,10 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
                                                 }
                                                
                                                [tableViewForSearchEntity reloadData];
-                                               [self performSelector:@selector(killHUD) withObject:nil afterDelay:1];
+                                               [self performSelector:@selector(killActivityindicator) withObject:nil afterDelay:1];
                                                
                                            }else {
-                                               [self performSelector:@selector(killHUD) withObject:nil afterDelay:1];
+                                               [self performSelector:@selector(killActivityindicator) withObject:nil afterDelay:1];
                                                UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Message" message:@"No data found." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles: nil];
                                                [alert show];
                                            }
@@ -1217,7 +1519,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 //http://itunes.apple.com/search?term=makamaka&media=software&lang=en_US&country=us
 -(void)callItunesWebService:(NSString*)stringForSearch{
 
-        
+   [tableViewForSearchEntity setContentOffset:CGPointMake(0, 0) animated:YES];
     NSString *str=@"";
     if (selectedCategory==0) {
         str=[NSString stringWithFormat:@"https://itunes.apple.com/search?term=%@&media=ebook&lang=en_US&limit=50",stringForSearch];
@@ -1480,6 +1782,9 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 
 -(void)selectCategory
 {
+//    btnForTakePicture.image=nil;
+    txtField.text=@"";
+
     if ([dicForCategorySelected count]>0) {
         // NSLog(@"value of selected dictionary %@",dicForCategorySelected);
         
@@ -1527,62 +1832,7 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
     }
 
 }
--(void)viewWillAppear:(BOOL)animated{
-    [self.view endEditing:YES];
-    [txtView resignFirstResponder];
-    [scrollViewForPost setContentOffset:CGPointMake(0, 0) animated:YES];
-       [self.tabBarController setTabBarHidden:YES animated:NO completion:NULL];
-    AppDelegate *delegate=(AppDelegate *)[UIApplication sharedApplication].delegate;
-    strForAddress=delegate.strForAddressDelegate;
-    [self performSelector:@selector(getAddressLocation) withObject:nil afterDelay:0.5];
-    self.navigationController.navigationBar.hidden=YES;
-    
-    if (pushApplyFilter) {
-        pushApplyFilter=NO;
-        
-        ApplyFilterViewController *filObj=[[ApplyFilterViewController alloc] init];
-        filObj.imageOrg=[imageFinal thumbnailImage:640 transparentBorder:0 cornerRadius:0 interpolationQuality:kCGInterpolationHigh];
-        //filObj.imageOrg=[image copy];
-        [self.navigationController pushViewController:filObj animated:YES];
-        
-        //        CropViewController *obj=[[CropViewController alloc] init];
-        //        obj.imgSet=[imageFinal copy];
-        //        obj.delegate=self;
-        //        obj.sizeForCrop=CGRectMake(1, 100, 318, 250);
-        //        [self.navigationController pushViewController:obj animated:YES];
-        return;
-    }
-    
-    if (imageFinal!=nil) {
-        if (btnForTakePicture!=nil) {
-            [btnForTakePicture removeFromSuperview];
-        }
-        btnForTakePicture=[[UIImageView alloc] initWithImage:imageFinal];
-        
-        UIImage *imageload=[btnForTakePicture image];
-        
-        
-        //btnForTakePicture=[[UIImageView alloc] initWithImage:imageload];//welike_screen5
-        CGFloat imageWidth = imageload.size.width;
-        CGFloat imageHeight = imageload.size.height;
-        
-        int scrollWidth = scrollViewTakePhoto.frame.size.width;
-        int scrollHeight = scrollViewTakePhoto.frame.size.height;
-        
-        float scaleX = scrollWidth / imageWidth;
-        float scaleY = scrollHeight / imageHeight;
-        float scaleScroll =  (scaleX < scaleY ? scaleY : scaleX);
-        //scrollViewTakePhoto.bounds = CGRectMake(0, 0,imageWidth , imageHeight );
-        scrollViewTakePhoto.contentSize = imageload.size;
-        scrollViewTakePhoto.maximumZoomScale = scaleScroll*3;
-        scrollViewTakePhoto.minimumZoomScale = scaleScroll;
-        scrollViewTakePhoto.zoomScale = scaleScroll;
-        [scrollViewTakePhoto addSubview:btnForTakePicture];
-    }
-    
-   [self performSelector:@selector(callSelect) withObject:nil afterDelay:0.3];
 
-}
 
 -(void)callSelect{
 
@@ -1590,15 +1840,15 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
         SelectCategoryViewController *obj=[[SelectCategoryViewController alloc] init];
         [self.parentView addSubview:obj.view];
         CGRect frame = self.parentView.frame;
-        [UIView setAnimationDelegate:self];
-        [UIView setAnimationDidStopSelector:@selector( animationDidStop:finished:context: )];
-        [UIView beginAnimations:@"slideMenu" context:(__bridge void *)(self.parentView)];
-        [UIView setAnimationDelay:0.1];
-        [UIView setAnimationDuration:0.5];
+//        [UIView setAnimationDelegate:self];
+//        [UIView setAnimationDidStopSelector:@selector( animationDidStop:finished:context: )];
+//        [UIView beginAnimations:@"slideMenu" context:(__bridge void *)(self.parentView)];
+//        [UIView setAnimationDelay:0.1];
+//        [UIView setAnimationDuration:0.5];
         if (frame.origin.y==0) {
-            frame.origin.y = -460;
+            frame.origin.y = -410;
         }else{
-            frame.origin.y = 0;
+            frame.origin.y = 40;
         }
         self.parentView.frame = frame;
         [UIView commitAnimations];
@@ -1622,7 +1872,10 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 
 - (void)viewDidUnload
 {
-    [super viewDidUnload];
+    [self setImgView_StarRating:nil];
+    [self setV_BottomView:nil];
+    //btn_Share = nil;
+     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
@@ -1636,6 +1889,9 @@ UIImage* imageFromView(UIImage* srcImage, CGRect* rect)
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (IBAction)btn_LockForpost:(id)sender {
 }
 
 @end

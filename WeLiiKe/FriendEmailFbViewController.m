@@ -51,9 +51,18 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
     //arrayForContacts=[[NSMutableArray alloc] init];
     arrayAllServerData=[[NSMutableArray alloc] init];
+    dicForFbID = [[NSMutableDictionary alloc]init];
+    arrayForFBID = [[NSMutableArray alloc]init];
+    arrayForEmailFriendName = [[NSMutableArray alloc]init];
+    searchBarExplore.placeholder =@"search for friends in your contact book";
+    for(UIView *subView in searchBarExplore.subviews){
+        if([subView isKindOfClass:UITextField.class]){
+            [(UITextField*)subView setTextColor:[UIColor grayColor]];
+        }
+    }
+
     
     
     
@@ -73,9 +82,9 @@
 }
 -(IBAction)actionOnBack:(id)sender
 {
-    [self showHUD];
-    [self performSelector:@selector(callWebserviceForAddFriend:) withObject:@"" afterDelay:0.2];
-    
+//    [self showHUD];
+//    [self performSelector:@selector(callWebserviceForAddFriend:) withObject:@"" afterDelay:0.2];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)collectContacts
@@ -219,8 +228,9 @@
         NSError *error=nil;
         NSString *str=[sender stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
         //NSLog(@"value of data %@",str);
+       
         id strForResponce = [NSJSONSerialization JSONObjectWithData: [str dataUsingEncoding:NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
-        
+      
         if (error==nil) {
             
             [self killHUD];
@@ -243,11 +253,12 @@
                     
                 }else{
                     arrayForAfterSearch=[[NSMutableArray alloc] initWithArray:strForResponce];
+                    
                 }
                 
                 
                 
-                
+                countForUserFound=0;
                 for (int i=0; i<[arrayForContacts count]; i++) {
                     
                     NSArray *arrayForEmail=[[arrayForContacts objectAtIndex:i] valueForKey:@"Email"];
@@ -258,11 +269,11 @@
                     }
                     BOOL check=NO;
                     for (int j=0; j<[arrayForAfterSearch count]; j++) {
-                        
+                       
                         if ([[[arrayForAfterSearch objectAtIndex:j] valueForKey:@"email"] isEqualToString:strForEmail]) {
                             check=YES;
                         }
-                        
+                       
                     }
                     if (check!=YES) {
                         NSMutableDictionary *dicForData=[[NSMutableDictionary alloc] init];
@@ -271,7 +282,8 @@
                         [dicForData setValue:@"invite" forKey:@"is_friend"];
                         [dicForData setValue:strForEmail forKey:@"email"];
                         [arrayForAfterSearch addObject:dicForData];
-                    }                    
+//                        countForUserFound++; // Commented to set initital zero when no friend is on weliike
+                    }
                 }
         
                 //********************************
@@ -284,7 +296,13 @@
                 NSArray *sortedArray = [arrayForAfterSearch sortedArrayUsingDescriptors:sortDescriptors];
                 arrayForAfterSearch=[[NSMutableArray alloc] initWithArray:sortedArray copyItems:YES];
                 arrayAllServerData=[arrayForAfterSearch mutableCopy];
-                
+                for(int i = 0; i<arrayForAfterSearch.count;i++)
+                {
+                    if(![[[arrayForAfterSearch objectAtIndex:i]valueForKey:@"is_friend"]isEqualToString:@"invite"])
+                    {
+                        countForUserFound++;
+                    }
+                }
                 [tableForAddFriend reloadData];
                 
                 NSLog(@"value of array ********* %@",arrayForAfterSearch);
@@ -339,7 +357,7 @@
 
 -(void)AddFriendHandler:(id)sender{
     [self killHUD];
-    
+    countForUserFound = 0;
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
                                    initWithTitle: @"Error"
@@ -414,7 +432,13 @@
                 arrayForAfterSearch=[[NSMutableArray alloc] initWithArray:sortedArray copyItems:YES];
                 //[tableForFollowing reloadData];
                 arrayAllServerData=[arrayForAfterSearch mutableCopy];
-                
+                for (int i=0;i<arrayAllServerData.count;i++) {
+                    if([[[arrayForAfterSearch objectAtIndex:i]valueForKey:@"is_friend"]isEqualToString:@"YES"])
+                    {
+                        countForUserFound++;
+                    }
+                }
+               
                 NSLog(@"value of arrrat %@",arrayForAfterSearch);
                 NSLog(@"COunt arrayForAfterSearch of FB friends %d",[arrayForAfterSearch count]);
                 [tableForAddFriend reloadData];
@@ -561,7 +585,7 @@
         if (lblForCountFriend==nil) {
             lblForCountFriend=[[RTLabel alloc] initWithFrame:CGRectMake(20, 10, 200, 50)];
         }
-        NSString *strText=[NSString stringWithFormat:@"<font size=20 color ='#707070'><b>You have <font color ='0099FF'> %d </font> %@ friends on weliike</b></font>",[arrayForAfterSearch count],strCheckFBandEmail];
+        NSString *strText=[NSString stringWithFormat:@"<font size=20 color ='#707070'><b>You have <font color ='0099FF'> %d </font> %@ friends on weliike</b></font>",countForUserFound,strCheckFBandEmail];
         [lblForCountFriend setText:strText];
         [cell addSubview:lblForCountFriend];
     
@@ -612,6 +636,7 @@
         cell.lblName.text=[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"user_name"];
         cell.lblForCountEntity.hidden=YES;
         if ([[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"is_friend"] isEqualToString:@"YES"]) {
+//             countForUserFound++;
             //cell.imgBg.hidden=NO;
             [cell.imgForAddSing setImage:[UIImage imageNamed:@"plus_active.png"] forState:UIControlStateNormal];
             cell.imgForAddSing.hidden=NO;
@@ -634,7 +659,7 @@
         }else{
             cell.imgForAddSing.hidden=NO;
             [cell.imgForAddSing setFrame:CGRectMake(230, 8, 70, 28)];
-            [cell.imgForAddSing setBackgroundImage:[UIImage imageNamed:@"blank_btn.png"] forState:UIControlStateNormal];
+            [cell.imgForAddSing setBackgroundImage:[UIImage imageNamed:@"blank_btn_grey.png"] forState:UIControlStateNormal];
             [cell.imgForAddSing.titleLabel setFont:[UIFont boldSystemFontOfSize:14]];
             [cell.imgForAddSing setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
             [cell.imgForAddSing setTitle:@"Re-Invite" forState:UIControlStateNormal];
@@ -667,11 +692,15 @@
                 NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForAfterSearch objectAtIndex:indexPath.row]];
                 [dic setValue:@"NO" forKey:@"is_friend"];
                 [arrayForAfterSearch replaceObjectAtIndex:indexPath.row withObject:dic];
+                if ([[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"is_friend"] isEqualToString:@"NO"]) {
+//                    countForUserFound --;
+                }
                 [tableForAddFriend reloadData];//user_id
                 [self showHUD];
                 [self performSelector:@selector(friendUnFollow:) withObject:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"user_id"] afterDelay:0.2];
                 
-            }else if ([[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"is_friend"] isEqualToString:@"invite"]){
+            }
+            else if ([[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"is_friend"] isEqualToString:@"invite"]){
                 
                 NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForAfterSearch objectAtIndex:indexPath.row]];
                 [dic setValue:nil forKey:@"is_friend"];
@@ -684,13 +713,17 @@
                 //****************** invite ******************************
                 
                 if ([strCheckFBandEmail isEqualToString:@"Facebook"]) {
-                    [self performSelector:@selector(inviteFriend:) withObject:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"facebook_id"] afterDelay:0];
-                }else {
+                    [arrayForFBID addObject:[[arrayForAfterSearch objectAtIndex:indexPath.row]valueForKey:@"facebook_id"]] ;
+                  
+//                    [self performSelector:@selector(inviteFriend:) withObject:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"facebook_id"] afterDelay:0];
+                }
+                else {
                     
-                    WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(invite_user:)];
-                    NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
-                    [service invite_user:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"email"] user_id:strID friend_name:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"user_name"]];
-                    
+//                    WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(invite_user:)];
+//                    NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+//                                       [service invite_user:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"email"] user_id:strID friend_name:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"user_name"]];
+    [arrayForFBID addObject:[[arrayForAfterSearch objectAtIndex:indexPath.row]valueForKey:@"email"]] ;
+                     [arrayForEmailFriendName addObject:[[arrayForAfterSearch objectAtIndex:indexPath.row]valueForKey:@"user_name"]] ;
                 }
                 
             }else if ([[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"is_friend"] isEqualToString:@"NO"]) {
@@ -698,11 +731,29 @@
                 NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForAfterSearch objectAtIndex:indexPath.row]];
                 [dic setValue:@"YES" forKey:@"is_friend"];
                 [arrayForAfterSearch replaceObjectAtIndex:indexPath.row withObject:dic];
+                if (![[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"is_friend"] isEqualToString:@"invite"]) {
+//                    countForUserFound ++;
+                }
+                [tableForAddFriend reloadData];//user_id
+                
+                NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+                if([strCheckFBandEmail isEqualToString:@"Facebook"]){
+                    WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(add_friend_form_facebook_and_emailHandler:)];
+                       NSString *strForFacebookId = [[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"facebook_id"] ;
+                      [service add_friend_form_facebook_and_email:@"0" email_friend_id:@"" user_id:strID facebook_friend_id:strForFacebookId];
+                }
+                else{
+                    WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(add_friend_form_facebook_and_emailHandler:)];
+                NSString *strForEmailId = [[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"email"] ;
+                [service add_friend_form_facebook_and_email:@"1" email_friend_id:strForEmailId user_id:strID facebook_friend_id:@""];
+                }
+            
+
             }
             else {
-                WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(invite_user:)];
-                NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
-                 [service invite_user:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"email"] user_id:strID friend_name:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"user_name"]];
+//                WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(invite_user:)];
+//                NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+//                 [service invite_user:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"email"] user_id:strID friend_name:[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"user_name"]];
                 
             }
             [tableForAddFriend reloadData];
@@ -900,7 +951,7 @@
     WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(addFriendByCategoryHandler:)];
     NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
     
-    [service addFriendByCategory:strID friend_user_id:strFriend user_category_id:@""];
+    [service addFriendByCategory:strID friend_user_id:strFriend user_category_id:@"" ];
         
     
 }
@@ -967,53 +1018,128 @@
 }
 
 
+//-(void)callWebserviceForAddFriend:(NSString *)strIndex{
+//    
+//    
+//    NSString *strForEmail=@"";
+//    NSString *strForFriendID=@"";
+//    if ([strIndex isEqualToString:@"all"]) {
+//        NSMutableArray *arrayForFriend=[[NSMutableArray alloc] init];
+//        for (int i=0 ;i<[arrayForAfterSearch count]; i++) {
+//            if ([[arrayForAfterSearch objectAtIndex:i] valueForKey:@"user_id"]!=nil) {
+//                [arrayForFriend addObject:[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"user_id"]];
+//                countForUserFound = [arrayForFriend count];
+//
+//            }
+//            
+//        }
+//        strForFriendID=[arrayForFriend componentsJoinedByString:@","];
+//      
+//    }else{
+//        NSMutableArray *arrayForFriend=[[NSMutableArray alloc] init];
+//        for (int i=0 ;i<[arrayForAfterSearch count]; i++) {
+//             if ([[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"YES"]) {
+//            [arrayForFriend addObject:[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"user_id"]];
+//                 countForUserFound = [arrayForFriend count];
+//
+//             }
+//        }
+//        strForFriendID=[arrayForFriend componentsJoinedByString:@","];
+//
+//    }
+//    if ([strForFriendID length]==0) {
+//        [self killHUD];
+//        [self.navigationController popViewControllerAnimated:YES];
+//        return;
+//    }
+//    if ([strCheckFBandEmail isEqualToString:@"Facebook"]) {
+//        strForEmail=@"0";
+//    }else {
+//        strForEmail=@"1";
+//    }
+//    
+//    //NSLog(@"value of Friend ID ***************** %@",strFriend);
+//    WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(add_friend_form_facebook_and_emailHandler:)];
+//    NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+//    if ([strForEmail isEqualToString:@"0"]) {
+//        [service add_friend_form_facebook_and_email:strForEmail email_friend_id:@"" user_id:strID facebook_friend_id:strForFriendID];
+//    }else{
+//        [service add_friend_form_facebook_and_email:strForEmail email_friend_id:strForFriendID user_id:strID facebook_friend_id:@""];
+//    }
+//    
+//       
+//}
+
 -(void)callWebserviceForAddFriend:(NSString *)strIndex{
-    
-    
-    NSString *strForEmail=@"";
-    NSString *strForFriendID=@"";
-    if ([strIndex isEqualToString:@"all"]) {
-        NSMutableArray *arrayForFriend=[[NSMutableArray alloc] init];
-        for (int i=0 ;i<[arrayForAfterSearch count]; i++) {
-            if ([[arrayForAfterSearch objectAtIndex:i] valueForKey:@"user_id"]!=nil) {
-                [arrayForFriend addObject:[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"user_id"]];
+    NSString *strForFacebookId;
+    if ([strCheckFBandEmail isEqualToString:@"Facebook"])  {
+        for (int i =0 ; i<arrayForAfterSearch.count; i++) {
+            if ([[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"invite"]){
+                NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForAfterSearch objectAtIndex:i]];
+                [dic setValue:nil forKey:@"is_friend"];
+                [arrayForAfterSearch replaceObjectAtIndex:i withObject:dic];
+                 [arrayForFBID addObject:[[arrayForAfterSearch objectAtIndex:i]valueForKey:@"facebook_id"]] ;
             }
-                
+            else if ([[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"NO"]) {
+                NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForAfterSearch objectAtIndex:i]];
+                [dic setValue:@"YES" forKey:@"is_friend"];
+                [arrayForAfterSearch replaceObjectAtIndex:i withObject:dic];
+                if ([[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"YES"]) {
+//                    countForUserFound ++;
+                }
+            }
+               strForFacebookId = [[arrayForAfterSearch objectAtIndex:i] valueForKey:@"facebook_id"] ;
+          
+    }
+        WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(add_friend_form_facebook_and_emailHandler:)];
+        NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+     
+        [service add_friend_form_facebook_and_email:@"0" email_friend_id:@"" user_id:strID facebook_friend_id:strForFacebookId];
+        if (arrayForFBID.count>0 && [strCheckFBandEmail isEqualToString:@"Facebook"]) {
+            [self showHUD];
+            
+            NSString *strForFBID=[arrayForFBID componentsJoinedByString:@","];
+            NSLog(@"string = = = = = %@", strForFBID);
+            [self inviteFriend:strForFBID];
         }
-        strForFriendID=[arrayForFriend componentsJoinedByString:@","];
-    }else{
-        NSMutableArray *arrayForFriend=[[NSMutableArray alloc] init];
-        for (int i=0 ;i<[arrayForAfterSearch count]; i++) {
-             if ([[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"YES"]) {
-            [arrayForFriend addObject:[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"user_id"]];
-             }
-        }
-        strForFriendID=[arrayForFriend componentsJoinedByString:@","];
 
     }
-    if ([strForFriendID length]==0) {
-        [self killHUD];
-        [self.navigationController popViewControllerAnimated:YES];
-        return;
+   
+    else{
+        for (int i =0 ; i<arrayForAfterSearch.count; i++) {
+            if ([[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"invite"]){
+                NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForAfterSearch objectAtIndex:i]];
+                [dic setValue:nil forKey:@"is_friend"];
+                [arrayForAfterSearch replaceObjectAtIndex:i withObject:dic];
+                [arrayForFBID addObject:[[arrayForAfterSearch objectAtIndex:i]valueForKey:@"email"]] ;
+                [arrayForEmailFriendName addObject:[[arrayForAfterSearch objectAtIndex:i]valueForKey:@"user_name"]] ;
+
+        }
+            else if ([[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"NO"]) {                
+                NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForAfterSearch objectAtIndex:i]];
+                [dic setValue:@"YES" forKey:@"is_friend"];
+                [arrayForAfterSearch replaceObjectAtIndex:i withObject:dic];
+                    if (![[[arrayForAfterSearch objectAtIndex:i] valueForKey:@"is_friend"] isEqualToString:@"invite"]) {
+                    countForUserFound ++;
+                    }
+                 [tableForAddFriend reloadData];
+                NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+                WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(add_friend_form_facebook_and_emailHandler:)];
+                NSString *strForEmailId = [[arrayForAfterSearch objectAtIndex:i] valueForKey:@"email"] ;
+                [service add_friend_form_facebook_and_email:@"1" email_friend_id:strForEmailId user_id:strID facebook_friend_id:@""];         
+                }
+           
     }
-    if ([strCheckFBandEmail isEqualToString:@"Facebook"]) {
-        strForEmail=@"0";
-    }else {
-        strForEmail=@"1";
-    }
+        [self showHUD];
+        WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(invite_user:)];
+        NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+        NSString *strForFBID=[arrayForFBID componentsJoinedByString:@","];
+        NSString *strForEmailFriendName = [arrayForEmailFriendName componentsJoinedByString:@","];
+        [service invite_user:strForFBID user_id:strID friend_name:strForEmailFriendName];
+   
     
-    //NSLog(@"value of Friend ID ***************** %@",strFriend);
-    WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(add_friend_form_facebook_and_emailHandler:)];
-    NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
-    if ([strForEmail isEqualToString:@"0"]) {
-        [service add_friend_form_facebook_and_email:strForEmail email_friend_id:@"" user_id:strID facebook_friend_id:strForFriendID];
-    }else{
-        [service add_friend_form_facebook_and_email:strForEmail email_friend_id:strForFriendID user_id:strID facebook_friend_id:@""];
-    }
-    
-       
 }
-
+}
 -(void)add_friend_form_facebook_and_emailHandler:(id)sender{
     
     [self killHUD];
@@ -1038,9 +1164,12 @@
             [self killHUD];
             NSLog(@"value of responce %@",strForResponce);
             if ([strForResponce count]>0) {
-                
-                [self.navigationController popViewControllerAnimated:YES];
-                
+                if ([strCheckFBandEmail isEqualToString:@"Facebook"]) {                    
+                }
+                else
+                {
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
             }else{
                 //[arrayForServerData removeAllObjects];
                 UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -1077,4 +1206,26 @@
 
 
 
+- (IBAction)actionOnDone:(id)sender {
+    if (arrayForFBID.count>0 && [strCheckFBandEmail isEqualToString:@"Facebook"]) {
+         [self showHUD];
+        NSLog(@"dic = = = = =123456    = = = = =%@", arrayForFBID);
+       NSString *strForFBID=[arrayForFBID componentsJoinedByString:@","];
+        NSLog(@"string = = = = = %@", strForFBID);
+        [self inviteFriend:strForFBID];
+    }
+    else{
+         [self showHUD];
+        WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(invite_user:)];
+              NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
+           NSString *strForFBID=[arrayForFBID componentsJoinedByString:@","];
+        NSString *strForEmailFriendName = [arrayForEmailFriendName componentsJoinedByString:@","];
+        [service invite_user:strForFBID user_id:strID friend_name:strForEmailFriendName];
+    }
+    [self.navigationController popViewControllerAnimated:YES];
+  }
+- (void)viewDidUnload {
+    btnBack = nil;
+    [super viewDidUnload];
+}
 @end

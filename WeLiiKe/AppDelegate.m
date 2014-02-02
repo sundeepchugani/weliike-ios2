@@ -17,6 +17,7 @@ static NSString* kAppId = @"483095475079437";
 @synthesize window = _window,tabBarController,navControllerApp,btnPost,currentLatitude,currentLongitute;
 @synthesize dictionaryForImageCacheing,arrayOfEmailContact,locationManager=_locationManager,arrayOfUserForMessage;
 @synthesize strForAddressDelegate;
+@synthesize B_defualf;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -48,11 +49,21 @@ static NSString* kAppId = @"483095475079437";
     //self.window.backgroundColor = [UIColor whiteColor];
     arrayOfEmailContact = [[NSMutableArray alloc] init];
     arrayOfUserForMessage = [[NSMutableArray alloc] init];
-    btnPost=[[UIButton alloc] initWithFrame:CGRectMake(127,431, 65, 49)];
-    [btnPost setImage:[UIImage imageNamed:@"post_icon.png"] forState:UIControlStateNormal];
-    [btnPost addTarget:self action:@selector(actionOnPost:) forControlEvents:UIControlEventTouchUpInside];
-    [self.tabBarController.view addSubview:btnPost];
+//    btnPost=[[UIButton alloc] initWithFrame:CGRectMake(127,431, 65, 49)];
+//    [btnPost setImage:[UIImage imageNamed:@"post_icon.png"] forState:UIControlStateNormal];
+//    [btnPost addTarget:self action:@selector(actionOnPost:) forControlEvents:UIControlEventTouchUpInside];
+//    [self.tabBarController.view addSubview:btnPost];
+    CGRect frame = CGRectMake(0, 0, 320, 49);
+    UIView *v = [[UIView alloc] initWithFrame:frame];
+    UIImage *i = [UIImage imageNamed:@"welike_footer.png"];
+    UIColor *c = [[UIColor alloc] initWithPatternImage:i];
+    v.backgroundColor = c;
     
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 5)  {
+        [[tabBarController tabBar] insertSubview:v atIndex:0];
+    }else{
+        [[tabBarController tabBar] insertSubview:v atIndex:1];
+    }
     
     if(self.locationManager==nil){
         _locationManager=[[CLLocationManager alloc] init];        

@@ -25,6 +25,7 @@
     UIButton *btnPost;
     NSMutableArray *arrayOfEmailContact;
     NSMutableArray *arrayOfUserForMessage;
+    BOOL B_defualf;
     
     //*********
     //CLLocationManager *locationManager;
@@ -35,6 +36,7 @@
     NSString *strForAddressDelegate;
     int countForAddress;
 }
+@property (assign) BOOL B_defualf;
 @property (nonatomic, retain)NSString *strForAddressDelegate;
 @property (nonatomic, retain) Facebook *facebook;
 @property(assign,nonatomic)double currentLatitude;

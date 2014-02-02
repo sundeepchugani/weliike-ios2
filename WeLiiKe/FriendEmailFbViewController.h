@@ -20,6 +20,7 @@
 
 @interface FriendEmailFbViewController : UIViewController<FBRequestDelegate,FBDialogDelegate,UISearchBarDelegate>{
 
+    IBOutlet UIButton *btnBack;
     UITableView *tableForAddFriend;
     NSMutableArray *arrayForContacts;
     HudView *aHUD;
@@ -29,8 +30,14 @@
     RTLabel *lblForCountFriend;
     UIButton *btnAllFriendFollow;
     UISearchBar *searchBarExplore;
-    
+    int countForUserFound;
+    NSMutableArray *arrayForAddedFriendCount;
+    NSMutableDictionary *dicForFbID;
+    NSMutableArray *arrayForFBID;
+    NSMutableArray *arrayForEmailFriendName;
+ 
 }
+- (IBAction)actionOnDone:(id)sender;
 @property(nonatomic,retain)IBOutlet UISearchBar *searchBarExplore;
 @property(nonatomic,retain)UIButton *btnAllFriendFollow;
 @property(nonatomic,retain)RTLabel *lblForCountFriend;

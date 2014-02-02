@@ -21,7 +21,10 @@
     UITableView *tableForSearch;
     NSMutableArray *arrayForAfterSearch,*arrayAllServerData;
     HudView *aHUD;
+    UIActivityIndicatorView *activityIndicatorView;
 }
+@property (strong, nonatomic) IBOutlet UIButton *btn_Edit;
+- (IBAction)actionOnEdit:(id)sender;
 -(IBAction)actionOnBack:(id)sender;
 @property(nonatomic,retain)IBOutlet UITableView *tableForSearch;
 @property(nonatomic,retain)IBOutlet UILabel *lblForUserName;

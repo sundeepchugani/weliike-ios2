@@ -17,8 +17,12 @@
     NSMutableArray *arrayForServerData,*arrayForSearchResult,*arrayForSuggestedUser,*arrayForServerDataForSugested;
     HudView *aHUD;
     NSString *strForCategoryId;
+        NSMutableDictionary *dicForSelectedUser;
     NSString *strForMasterID;
+    int userFromServer;
+    NSMutableArray *arrayForServerDataSearch;
 }
+- (IBAction)actionOnDone:(id)sender;
 @property(nonatomic,retain)NSString *strForCategoryId,*strForMasterID;
 @property(nonatomic,retain)IBOutlet UITableView *tableForFollowing;
 

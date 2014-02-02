@@ -1,3 +1,6 @@
+
+
+
 //
 //  EnityUserController.m
 //  WeLiiKe
@@ -12,11 +15,14 @@
 #import "AddFriendForCategory.h"
 #import "MediadetailViewController.h"
 #import "OtherUserProfile.h"
+#import "TJSpinner.h"
 
+   NSString *stringForCategoryName;
 @implementation EnityUserController
 @synthesize tableViewForCategoty,strForCateID,btnForDone,labelForName,btnForTitle,tableViewForWeliike,strForMastCateID,viewForFollowFollowing,strForClass;
 @synthesize strForCateName,btnForFollowing,btnForEntity,btnForFollower,imgViewForHeader;
-@synthesize strUserID,viewForHeaderBot,strForSearchName,btnForSort;
+@synthesize strUserID,viewForHeaderBot,strForSearchName,btnForSort,selectedItmeFromWeLiike;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -75,6 +81,17 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    spinner = [[TJSpinner alloc] initWithSpinnerType:kTJSpinnerTypeActivityIndicator];
+    [spinner setCenter:CGPointMake(125, (self.view.frame.size.height)/100*(80)-(spinner.frame.size.height))];
+    [spinner setColor:[UIColor darkGrayColor]];
+    [spinner setStrokeWidth:20];
+    [spinner setInnerRadius:5];
+    [spinner setOuterRadius:25];
+    [spinner setNumberOfStrokes:8];
+    spinner.hidesWhenStopped = NO;
+    [spinner setPatternStyle:TJActivityIndicatorPatternStylePetal];
+    NSLog(@"spinner width  = = = = = = %f", (self.view.frame.size.width/2-(spinner.frame.size.width/2)));
+    [self.view addSubview:spinner];
     page_No=1;
     checkForGridAndList=0;
     //arrayForServerData=[[NSMutableArray alloc] init];
@@ -82,6 +99,9 @@
     selectedItmeFromWeLiike=0;
      
     labelForName.text=strForCateName;
+    stringForCategoryName = strForCateName;
+    NSLog(@"string = = = = =  = = %@", stringForCategoryName);
+    stringForCategoryName = labelForName.text;
     btnForTitle=[[UIButton alloc] initWithFrame:CGRectMake(60, 50, 200, 35)];
     //[btnForTitle setBackgroundColor:[UIColor redColor]];
     
@@ -167,7 +187,7 @@
     [viewForWeliike setBackgroundColor:[UIColor clearColor]];
     [self.view addSubview:viewForWeliike];
    
-    UIImageView *imgBg=[[UIImageView alloc] initWithFrame:CGRectMake(0, -15, 280, 220)];
+    UIImageView *imgBg=[[UIImageView alloc] initWithFrame:CGRectMake(-20, -12, 320, 300)];
     [imgBg setImage:[UIImage imageNamed:@"blank_bubble.png"]];
     [viewForWeliike addSubview:imgBg];
     
@@ -206,29 +226,34 @@
     }
     
     if (selectedItmeFromWeLiike==0) {
-        [btnForTitle setTitle:[NSString stringWithFormat:@"My %@",strForCateName] forState:UIControlStateNormal];
-        [self showHUD];
+        NSString *strID=[[[NSUserDefaults standardUserDefaults] valueForKey:@"UserName"]uppercaseString];
+        [btnForTitle setTitle:[NSString stringWithFormat:@"%@",strID] forState:UIControlStateNormal];
+//        [self showHUD];
+        [spinner startAnimating];
         strForSearchName=[NSString stringWithFormat:@"i_liike"];
         
         [self performSelector:@selector(callWebService) withObject:nil afterDelay:0.2];
         
     }else if (selectedItmeFromWeLiike==1) {
         
-        
-        [self showHUD];
+//        [self showHUD];
+                [spinner startAnimating];
         strForSearchName=[NSString stringWithFormat:@"weliike"];
         [btnForTitle setTitle:[NSString stringWithFormat:@"WeLiike"] forState:UIControlStateNormal];
-        
+          [self performSelector:@selector(makeFollowFollowingView)];
         [self performSelector:@selector(actionOnWeliike) withObject:nil afterDelay:0.2];
+       
     }else if (selectedItmeFromWeLiike==2) {
-        [self showHUD];
+//        [self showHUD];
+                [spinner startAnimating];
         strForSearchName=[NSString stringWithFormat:@"friend"];
         [btnForTitle setTitle:[NSString stringWithFormat:@"All Friends"] forState:UIControlStateNormal];
         
         [self performSelector:@selector(actionOnAllFriend) withObject:nil afterDelay:0.2];
         
     }else if (selectedItmeFromWeLiike==3) {
-        [self showHUD];
+//        [self showHUD];
+                [spinner startAnimating];
         strForSearchName=[NSString stringWithFormat:@"trends"];
         [btnForTitle setTitle:[NSString stringWithFormat:@"Trends"] forState:UIControlStateNormal];
         
@@ -240,7 +265,8 @@
     
 }
 -(void)callWebService{
-        [self showHUD];
+//        [self showHUD];
+//    [spinner startAnimating];
         strForSearchName=[NSString stringWithFormat:@"i_liike"];
         WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(getEntityByCategoryIDHandler:)];
 
@@ -263,7 +289,8 @@
 }
 -(void)getEntityByCategoryIDHandler:(id)sender{
     [self killHUD];
-    
+    [spinner stopAnimating];
+    [spinner removeFromSuperview];
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
                                    initWithTitle: @"Error"
@@ -277,11 +304,13 @@
         NSError *error=nil;
         NSString *str=[sender stringByReplacingOccurrencesOfString:@"&quot;" withString:@"\""];
         //NSLog(@"value of data %@",str);
-        id strForResponce = [NSJSONSerialization JSONObjectWithData: [str dataUsingEncoding:NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
+        id strForResponce = [NSJSONSerialization JSONObjectWithData: [sender dataUsingEncoding:NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
         
         if (error==nil) {
             
-            [self killHUD];
+//            [self killHUD];
+                [spinner stopAnimating];
+                [spinner removeFromSuperview];
             if ([strForResponce count]>0) {
                 if ([strForResponce isKindOfClass:[NSDictionary class]] && [strForResponce count]==1) {
                     
@@ -343,7 +372,9 @@
 }
 
 -(void)weLiikeHandler:(id)sender{
-    [self killHUD];
+//    [self killHUD];
+    [spinner stopAnimating];
+    [spinner removeFromSuperview];
     
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -425,8 +456,9 @@
     }
 
 -(void)GetTrendsHandler:(id)sender{
-    [self killHUD];
-    
+//    [self killHUD];
+    [spinner stopAnimating];
+    [spinner removeFromSuperview];
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
                                    initWithTitle: @"Error"
@@ -444,7 +476,7 @@
         
         if (error==nil) {
             
-            [self killHUD];
+//            [self killHUD];
             if ([strForResponce count]>0) {
                 
                 if ([strForResponce isKindOfClass:[NSDictionary class]] && [strForResponce count]==1) {
@@ -525,7 +557,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     
     if (tableView==tableViewForWeliike) {
-        return 5;
+        return 4;
     }else{
         if ([arrayForServerData count]==0) {
             return 0;
@@ -574,28 +606,44 @@
     
     if (tableView==tableViewForWeliike) {
         [cell111.textLabel setFont:[UIFont boldSystemFontOfSize:15]];
+        //COPIED FROM FEEDVIEWCONTROLLER - SUNDEEP
+        [cell111.textLabel setTextAlignment:UITextAlignmentCenter];
+        //[lblForAddress setBackgroundColor:[UIColor clearColor]];
+        [cell111.textLabel setTextColor:[UIColor darkGrayColor]];
+        //[image addSubview:lblForAddress];
+        //END OF COPIED FROM FEEDVIEWCONTROLLER - SUNDEEP
         cell111.selectionStyle=UITableViewCellSelectionStyleNone;
         if (indexPath.row==0) {
-            cell111.textLabel.text=[NSString stringWithFormat:@"     My %@",strForCateName];
+            id sender=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserName"];
+            NSLog(@"sender %@",sender);
+            if ([sender isKindOfClass:[NSString class]]) {
+                sender=[sender uppercaseString];
+                cell111.textLabel.text  = [NSString stringWithFormat:@"%@",sender];
+            }
+//            [NSString stringWithFormat:@"     MY %@",strForCateName];
             
         }else if (indexPath.row==1) {
             
-            cell111.textLabel.text=@"     WeLiike";
+            cell111.textLabel.text=@"WELIKE";
+            //[cell111.textLabel setTextAlignment:UITextAlignmentCenter];
+            //[cell111.textLabel setTextColor:[UIColor darkGrayColor]];
+            
             
         }else if (indexPath.row==2) {
-            cell111.textLabel.text=@"     All Friends";
+            cell111.textLabel.text=@"FRIENDS";
             
         }else if (indexPath.row==3) {
-            cell111.textLabel.text=@"     Trends";
-            
-        }else if (indexPath.row==4) {
-            
-            UIImageView *imgBg=[[UIImageView alloc] initWithFrame:CGRectMake(-10, 0, 280, 50)];
-            [imgBg setImage:[UIImage imageNamed:@"cloud_box.png"]];
-            [cell111.selectedBackgroundView addSubview:imgBg];
-            cell111.textLabel.text=@"     Friend cloud";
+            cell111.textLabel.text=@"TRENDING";
             
         }
+//        else if (indexPath.row==4) {
+//            
+//            UIImageView *imgBg=[[UIImageView alloc] initWithFrame:CGRectMake(-10, 0, 280, 50)];
+//            [imgBg setImage:[UIImage imageNamed:@"cloud_box.png"]];
+//            [cell111.selectedBackgroundView addSubview:imgBg];
+//            cell111.textLabel.text=@"     Friend cloud";
+//            
+//        }
         if (selectedItmeFromWeLiike==indexPath.row) {
             cell111.textLabel.textColor=[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0];
         }else{
@@ -716,7 +764,7 @@
                         
                         cell.image1.tag=(i *3)+j;
                         cell.image1.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                        cell.image1.layer.borderWidth=1.5;
+                        cell.image1.layer.borderWidth=0;
                         [cell.image1 loadImage:str];
                         [cell.profileImage1 loadImage:strProfile];
                         cell.profileImage1.tag=(i *3)+j;
@@ -727,6 +775,9 @@
                         cell.imgViewForGra1.hidden=NO;
                         [cell.image1 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                         [cell.lbl1 setTextColor:[UIColor whiteColor]];
+                        //ADDED BY SUNDEEP
+                        [cell.lbl1 setTextAlignment:UITextAlignmentLeft];
+                        //END OF SUNDEEP
                         
                         id displayNameTypeValue = [[arrayForServerData objectAtIndex:(i *3)+j] valueForKey:@"entity_name"];
                         NSString *displayNameType = @"";
@@ -755,11 +806,14 @@
                         [cell.profileImage2 loadImage:strProfile];
                         cell.imgViewForGra2.hidden=NO;
                         cell.image2.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                        cell.image2.layer.borderWidth=1.5;
+                        cell.image2.layer.borderWidth=0;
                         [cell.image2 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                         
                         
                         [cell.lbl2 setTextColor:[UIColor whiteColor]];
+                        //ADDED BY SUNDEEP
+                        [cell.lbl2 setTextAlignment:UITextAlignmentLeft];
+                        //END OF SUNDEEP
                         id displayNameTypeValue = [[arrayForServerData objectAtIndex:(i *3)+j] valueForKey:@"entity_name"];
                         NSString *displayNameType = @"";
                         if (displayNameTypeValue != [NSNull null])
@@ -789,12 +843,15 @@
                         [cell.profileImage3 addTarget:self action:@selector(actionOnUserProfile:) forControlEvents:UIControlEventTouchUpInside];
                         [cell.profileImage3 loadImage:strProfile];
                         cell.image3.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                        cell.image3.layer.borderWidth=1.5;
+                        cell.image3.layer.borderWidth=0;
                         cell.imgViewForGra3.hidden=NO;
                         [cell.image3 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                         
                         
                         [cell.lbl3 setTextColor:[UIColor whiteColor]];
+                        //ADDED BY SUNDEEP
+                        [cell.lbl3 setTextAlignment:UITextAlignmentLeft];
+                        //END OF SUNDEEP
                         
                         id displayNameTypeValue = [[arrayForServerData objectAtIndex:(i *3)+j] valueForKey:@"entity_name"];
                         NSString *displayNameType = @"";
@@ -851,6 +908,8 @@
                 
                 if ([[arrayForServerData objectAtIndex:i] valueForKey:@"rating_count"]!=[NSNull null]) {
                     [cell1.starRate  setValue:[[[arrayForServerData objectAtIndex:i] valueForKey:@"rating_count"] intValue]];
+                    int  a = [[[arrayForServerData objectAtIndex:i]valueForKey:@"rating_count"]intValue];
+                    NSLog(@"hello i m here = = = = %d",a);
                 }else{
                     [cell1.starRate setValue:0];
                 }
@@ -975,7 +1034,9 @@
             //[self performSelector:@selector(actionOnWeliike)];
             selectedItmeFromWeLiike=indexPath.row;
             [btnForTitle setTitle:[NSString stringWithFormat:@"My %@",strForCateName] forState:UIControlStateNormal];
-            [self showHUD];
+//            [self showHUD];
+            [self.view addSubview:spinner];
+            [spinner startAnimating];
             strForSearchName=[NSString stringWithFormat:@"i_liike"];
             [self performSelector:@selector(callWebServiceForCityAndSubCate)];
             [self performSelector:@selector(callWebService) withObject:nil afterDelay:0.2];
@@ -984,13 +1045,17 @@
                   page_No=1;    
             selectedItmeFromWeLiike=indexPath.row;
            //
-            [self showHUD];
+//            [self showHUD];
+            [self.view addSubview:spinner];
+            [spinner startAnimating];
             strForSearchName=[NSString stringWithFormat:@"weliike"];
             [btnForTitle setTitle:[NSString stringWithFormat:@"WeLiike"] forState:UIControlStateNormal];
             [self performSelector:@selector(callWebServiceForCityAndSubCate)];
             [self performSelector:@selector(actionOnWeliike) withObject:nil afterDelay:0.2];
         }else if (indexPath.row==2) {
-            [self showHUD];
+//            [self showHUD];
+            [self.view addSubview:spinner];
+            [spinner startAnimating];
             page_No=1;
             selectedItmeFromWeLiike=indexPath.row;
             strForSearchName=[NSString stringWithFormat:@"friend"];
@@ -1000,7 +1065,9 @@
         
         }else if (indexPath.row==3) {
             page_No=1;
-            [self showHUD];
+//            [self showHUD];
+            [self.view addSubview:spinner];
+            [spinner startAnimating];
             strForSearchName=[NSString stringWithFormat:@"trends"];
             selectedItmeFromWeLiike=indexPath.row;
             [btnForTitle setTitle:[NSString stringWithFormat:@"Trends"] forState:UIControlStateNormal];
@@ -1036,7 +1103,8 @@
        if (checkForGridAndList!=0) {
         MediadetailViewController *obj=[[MediadetailViewController alloc] init];
         //NSLog(@"value of %@",[[arrayForServerData objectAtIndex:indexPath.row] valueForKey:@"entity_id"]);
-        obj.strForEntity=[[arrayForServerData objectAtIndex:indexPath.row] valueForKey:@"entity_id"];
+           NSLog(@"entity id = = = = = ==  = %@     and row number = = = = =%d", arrayForServerData,indexPath.row);
+        obj.strForEntity=[[arrayForServerData objectAtIndex:indexPath.row] valueForKey:@"user_entity_id"];
         obj.strUserID=[[arrayForServerData objectAtIndex:indexPath.row] valueForKey:@"user_id"];
         [self.navigationController pushViewController:obj animated:YES];
        }
@@ -1060,7 +1128,7 @@
     [imgViewGb setImage:[UIImage imageNamed:@"segment_bar.png"]];
     [viewForFollowFollowing addSubview:imgViewGb];
     //[btnForFollowing setTitle: forState:UIControlStateNormal];
-    btnForEntity=[[UIButton alloc] initWithFrame:CGRectMake(16, 0, 90, 45)];
+    btnForEntity=[[UIButton alloc] initWithFrame:CGRectMake(10, -10, 90, 45)];
     [btnForEntity setTitle:[NSString stringWithFormat:@"%d",[arrayForServerData count]] forState:UIControlStateNormal];
     //[btnForEntity setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     [btnForEntity.titleLabel setFont:[UIFont boldSystemFontOfSize:15]];
@@ -1071,7 +1139,7 @@
     [btnForEntity addTarget:self action:@selector(actionOnEntity:) forControlEvents:UIControlEventTouchUpInside];
     [viewForFollowFollowing addSubview:btnForEntity];
     
-    btnForFollowing=[[UIButton alloc] initWithFrame:CGRectMake(115, 0, 90, 45)];
+    btnForFollowing=[[UIButton alloc] initWithFrame:CGRectMake(115, -10, 90, 45)];
     [btnForFollowing setTitle:@"0" forState:UIControlStateNormal];
     //[btnForFollowing setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     [btnForFollowing.titleLabel setFont:[UIFont boldSystemFontOfSize:15]];
@@ -1083,7 +1151,7 @@
     [viewForFollowFollowing addSubview:btnForFollowing];
 
     
-    btnForFollower=[[UIButton alloc] initWithFrame:CGRectMake(215, 0, 90, 45)];
+    btnForFollower=[[UIButton alloc] initWithFrame:CGRectMake(215, -10, 90, 45)];
     [btnForFollower setTitle:@"0" forState:UIControlStateNormal];
     //[btnForFollower setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
     [btnForFollower.titleLabel setFont:[UIFont boldSystemFontOfSize:15]];
@@ -1277,7 +1345,9 @@
 
 
 -(void)GetAllFriendHandler:(id)sender{
-    [self killHUD];
+//    [self killHUD];
+    [spinner stopAnimating];
+    [spinner removeFromSuperview];
     
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -1392,7 +1462,7 @@
 -(void)actionOnFollower:(id)sender{
     UIButton *btn=(UIButton*)sender;
     
-    if ([[btn currentTitle] intValue]>0) {
+    if ([[btn currentTitle] intValue]>=0) {
         FollowerViewController *obj=[[FollowerViewController alloc] init];
         obj.strForCategoryId=strForCateID;
         obj.strForMasterCategoryId=strForMastCateID;
@@ -1449,7 +1519,7 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     if (tableView==tableViewForWeliike) {
-        return 40;
+        return 50;
     }else{
         if (checkForGridAndList==0) {
             return 130;

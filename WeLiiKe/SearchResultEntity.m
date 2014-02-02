@@ -18,7 +18,7 @@
     if (self) {
       
         imgForEntity=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(10, 10, 50, 50)];
-        [imgForEntity setBackgroundColor:[UIColor clearColor]];
+//        [imgForEntity setBackgroundColor:[UIColor lightGrayColor]];
         [self.contentView addSubview:imgForEntity];
         
         lblForEntityName=[[UILabel alloc] initWithFrame:CGRectMake(70, 0, 220, 50)];

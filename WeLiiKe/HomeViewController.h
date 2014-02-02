@@ -13,18 +13,22 @@
 #import "RTLabel.h"
 #import "HudView.h"
 #import "UserProfileFeedViewController.h"
+#import "TJSpinner.h"
 
 @interface HomeViewController : UIViewController<UIGestureRecognizerDelegate>
 {
     AsyncImageViewSmall *profileImage;
     IBOutlet AsyncImageViewSmall *coverImg;
+    IBOutlet UIButton *btn_Feed;
     UITableView *tableViewForCategoty;
     NSMutableArray *arrayForServerData,*arrayForGroup;
     UILabel *lblForTitle;
     UIImageView *lblForPopUp;
     HudView *aHUD;
+    TJSpinner  *spinner;
     
 }
+@property(nonatomic,retain)IBOutlet TJSpinner  *spinner;
 @property(nonatomic,retain)IBOutlet UILabel *lblForTitle;
 @property(nonatomic,retain)IBOutlet UITableView *tableViewForCategoty;
 -(IBAction)actionOnFeed:(id)sender;

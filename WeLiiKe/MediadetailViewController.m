@@ -14,10 +14,14 @@
 #import "EntityDetailViewController.h"
 #import "OtherUserProfile.h"
 #import "zoomViewController.h"
+#import "MapForCurrentLocationViewController.h"
+
 
 @implementation MediadetailViewController
+int caption_Height;
+int numberOfcommentCount;
 @synthesize scrollViewForMain,strForEntity,tableViewForDetail,strUserID;
-@synthesize lblForTitle;
+@synthesize lblForTitle,btn_MapButton;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -63,6 +67,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+      btn_MapButton.hidden  = YES;
     currentPage=0;
     MapViewForLocation=[[MKMapView alloc] init];
     MapViewForLocation.userInteractionEnabled=NO;
@@ -76,8 +81,13 @@
     // Do any additional setup after loading the view from its nib.
 }
 -(void)viewDidAppear:(BOOL)animated{
- 
+    
     [super viewDidAppear:animated];
+  
+
+    [self.tabBarController setTabBarHidden:NO
+                                  animated:YES];
+    //    delegate.btnPost.hidden = NO;
     [self showHUD];
     [self performSelector:@selector(callWebService) withObject:nil afterDelay:0.2];
     
@@ -127,9 +137,17 @@
                 //NSLog(@"value of %@",strForResponce);
                 
                 dicForServerData=[[NSMutableDictionary alloc] initWithDictionary:(NSDictionary*)strForResponce copyItems:YES];
+                
                 arrayForData=[[NSMutableArray alloc] init];
                 NSArray *array=[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"comment"];
                 lblForTitle.text=[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"user_entity_name"];
+                NSString *strForTitle=[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"master_category_name"];
+                if ([strForTitle isEqualToString:@"Apps & Games"]|| [strForTitle isEqualToString:@"Music"]|| [strForTitle isEqualToString:@"Books"]|| [strForTitle isEqualToString:@"Movies & TV"]){
+                    btn_MapButton.hidden  = YES;
+                }
+                else {
+                    btn_MapButton.hidden = NO;
+                }
                 [arrayForData addObject:array];
                 if ([dicForServerData valueForKey:@"post_info"] !=nil) {
                     NSArray *array=[dicForServerData valueForKey:@"post_info"];
@@ -152,8 +170,9 @@
                 
                 // NSArray *arrayForImage=[str componentsSeparatedByString:@" "];
                 if (scrollviewForAllImages==nil) {
-                    scrollviewForAllImages=[[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, 300)];
+                    scrollviewForAllImages=[[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, 250)];
                 }
+                
                 
                 int xForScrollView=0;
                 NSArray *viewsToRemove = [scrollviewForAllImages subviews];
@@ -162,6 +181,7 @@
                 
                 scrollviewForAllImages.pagingEnabled=YES;
                 scrollviewForAllImages.delegate=self;
+                
                 NSMutableArray *arrayForLatLong=[[NSMutableArray alloc] init];
                 for (int i=0; i<[arrayForData count]; i++) {
                     AsyncImageViewSmall *image=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(xForScrollView, 0, 320, 250)];
@@ -179,6 +199,13 @@
                         dicFordata=[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0];
                         str=[NSString stringWithFormat:@"%@",[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"user_entity_image"]];
                         strcaption=[NSString stringWithFormat:@"%@",[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"comment_text"]];
+                        caption_Height = [self calculateHeightForCaption: [NSString stringWithFormat:@"<font size=15>%@</font>",strcaption]];
+                        
+                        //scrollviewForAllImages=[[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 320, (250+caption_Height))];
+                        [scrollviewForAllImages setFrame:CGRectMake(0, 0, 320, (350+caption_Height))];
+                        //                        scrollviewForAllImages.backgroundColor = [UIColor yellowColor];
+//                        scrollviewForAllImages.backgroundColor = [UIColor yellowColor];
+                        
                         if (![[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"latitute"] isEqual:[NSNull null]]) {
                             [dic setValue:[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"latitute"] forKey:@"lat"];
                             [dic setValue:[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"longitude"] forKey:@"lng"];
@@ -225,14 +252,23 @@
                     btnForRate.tag=i;
                     [scrollviewForAllImages addSubview:btnForRate];
                     
-                    UIButton *lblForcaption=[[UIButton alloc] initWithFrame:CGRectMake(xForScrollView+10, 250, 300, 40)];
+                    //***************************************************************************************************************************************************************************************************************************
+                    RTLabel *lblForcaption=[[RTLabel alloc] initWithFrame:CGRectMake(xForScrollView+10, 250, 300, caption_Height)];
                     //lblForcaption.numberOfLines=2;
-                    [lblForcaption setBackgroundColor:[UIColor clearColor]];
-                    [lblForcaption.titleLabel setTextColor:[UIColor darkGrayColor]];
-                    [lblForcaption setTitle:strcaption forState:UIControlStateNormal];
+                    //                    [lblForcaption setBackgroundColor:[UIColor redColor]];
+                    lblForcaption.textColor  = [UIColor darkGrayColor];
+                    //                    [lblForcaption.titleLabel setTextColor:[UIColor darkGrayColor]];
+                    //                    [lblForcaption setTitle:strcaption forState:UIControlStateNormal];
+                    lblForcaption.text = [NSString stringWithFormat:@"<font size=15>%@</font>",strcaption];
+                    
+                    lblForcaption.lineBreakMode = UILineBreakModeWordWrap;
                     [lblForcaption setFont:[UIFont systemFontOfSize:15]];
-                    [lblForcaption setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-                    [lblForcaption setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
+                    //lblForcaption.textAlignment = UITextAlignmentLeft;
+                    // [lblForcaption sizeToFit];
+                    //                    lblForcaption.adjustsFontSizeToFitWidth = YES;
+                    
+                    //                    [lblForcaption setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+                    //                    [lblForcaption setContentHorizontalAlignment:UIControlContentHorizontalAlignmentLeft];
                     if ([strcaption length]>0) {
                         //[lblForcaption addTarget:self action:@selector(callCaptionView:) forControlEvents:UIControlEventTouchUpInside];
                     }
@@ -285,7 +321,7 @@
                 [errorAlert show];
                 
             }
-
+            
             
         }else{
             UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -302,7 +338,7 @@
 }
 
 -(void)callCaptionView:(UIButton*)sender{
-
+    
     CaptionPopViewController *obj=[[CaptionPopViewController alloc] init];
     obj.strForCaption=[sender currentTitle];
     obj.title=@"Caption";
@@ -314,29 +350,29 @@
     [popover presentPopoverFromView:sender];
     
     
-//    alertForCaption=[[UIAlertView alloc] init];
-//    [alertForCaption setMessage:@" \n\n\n\n\n\n\n\n\n\n\n\n " ];
-//    UIView *myView=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 280,345)] ;
-//    [myView setBackgroundColor:[UIColor redColor]];
-//    [myView setBackgroundColor:[UIColor yellowColor]];
-//    myView.layer.cornerRadius= 10.0f;
-//    myView.layer.masksToBounds=YES;
-//
-//    [alertForCaption addSubview:myView];
-//    
-//    UITextView *textView =[[UITextView alloc]init];
-//    textView.frame=CGRectMake(10,10,260,270);
-//    textView.backgroundColor=[UIColor  orangeColor];
-//    textView.text = [sender currentTitle];
-//    [alertForCaption addSubview:textView];
-//    
-//    UIButton *back=[[UIButton alloc] initWithFrame:CGRectMake(100, 250, 60, 40)];
-//    [back setBackgroundColor:[UIColor greenColor]];
-//    [back addTarget:self action:@selector(actiononAlertback:) forControlEvents:UIControlEventTouchUpInside];
-//    [back setTitle:@"back" forState:UIControlStateNormal];
-//    [myView addSubview:back];
-//    
-//    [alertForCaption show];
+    //    alertForCaption=[[UIAlertView alloc] init];
+    //    [alertForCaption setMessage:@" \n\n\n\n\n\n\n\n\n\n\n\n " ];
+    //    UIView *myView=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 280,345)] ;
+    //    [myView setBackgroundColor:[UIColor redColor]];
+    //    [myView setBackgroundColor:[UIColor yellowColor]];
+    //    myView.layer.cornerRadius= 10.0f;
+    //    myView.layer.masksToBounds=YES;
+    //
+    //    [alertForCaption addSubview:myView];
+    //
+    //    UITextView *textView =[[UITextView alloc]init];
+    //    textView.frame=CGRectMake(10,10,260,270);
+    //    textView.backgroundColor=[UIColor  orangeColor];
+    //    textView.text = [sender currentTitle];
+    //    [alertForCaption addSubview:textView];
+    //
+    //    UIButton *back=[[UIButton alloc] initWithFrame:CGRectMake(100, 250, 60, 40)];
+    //    [back setBackgroundColor:[UIColor greenColor]];
+    //    [back addTarget:self action:@selector(actiononAlertback:) forControlEvents:UIControlEventTouchUpInside];
+    //    [back setTitle:@"back" forState:UIControlStateNormal];
+    //    [myView addSubview:back];
+    //
+    //    [alertForCaption show];
     
     
 }
@@ -361,7 +397,7 @@
 }
 
 -(void)actiononAlertback:(id)sender{
-
+    
     [alertForCaption dismissWithClickedButtonIndex:0 animated:YES];
     [alertForCaption removeFromSuperview];
 }
@@ -417,7 +453,7 @@
     
     [service ratingEntity:[dicTemp valueForKey:@"user_id"] user_entity_id:[dicTemp valueForKey:@"user_entity_id"] rating_count:[NSString stringWithFormat:@"%d",(int)customStarRank.value] self_user_id:strID];
     
-        
+    
     
     
 }
@@ -470,7 +506,7 @@
                 [errorAlert show];
                 
             }
-
+            
             
         }else{
             UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -493,10 +529,10 @@
     }else if ([arrayForData count]>0 && checkForMapShow==YES) {
         NSLog(@"value of array data %d",2+[arrayForData count]);
         return 2+[arrayForData count];
-    } 
+    }
     
     return  0;
-}     
+}
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
@@ -505,12 +541,13 @@
         if (section==0) {
             return 1;
         }
-       
+        
         NSArray *arrayTemp=[arrayForData objectAtIndex:section-1];
         //NSLog(@"Section value %d and value of array count %d",section-1,[arrayTemp count]);
         
         return [arrayTemp count];
-    }else if ([arrayForData count]>0 && checkForMapShow==YES) {
+    }
+    else if ([arrayForData count]>0 && checkForMapShow==YES) {
         
         if (section==0) {
             return 1;
@@ -520,8 +557,8 @@
         NSArray *arrayTemp=[arrayForData objectAtIndex:section-2];
         
         return [arrayTemp count];
-    } 
-        
+    }
+    
     return  0;
 }
 
@@ -543,11 +580,11 @@
     if (indexPath.section==0) {
         if (indexPath.row==0) {
             
-        return cellScrolling;
+            return cellScrolling;
         }
     }else if (indexPath.section==1 && checkForMapShow==YES){
         if (indexPath.row==0) {
-                return cellMap;
+            return cellMap;
         }
     }
     else if(index<[arrayForData count]){
@@ -567,15 +604,20 @@
         [cellComment.btnForName setTitle:[[arrayTempComment objectAtIndex:indexPath.row] valueForKey:@"user_name"] forState:UIControlStateNormal];
         int height=0;
         if ([[[arrayTempComment objectAtIndex:indexPath.row] valueForKey:@"comment_text"] length]>0) {
+            //             NSString *p=[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"comment"];
             NSString *strForComment=[NSString stringWithFormat:@"%@",[[arrayTempComment objectAtIndex:indexPath.row] valueForKey:@"comment_text"]];
+            //         numberOfcommentCount =[[[arrayTempComment objectAtIndex:indexPath.row] valueForKey:@"comment_text"] count];
+            //            NSLog(@"number of comment count = = = = = = %d", numberOfcommentCount);
             cellComment.lblForComment.text=strForComment;
+            cellComment.lblForComment.delegate=self;
+            //            cellComment.lblForComment.backgroundColor = [UIColor redColor];
             height=[self calculateHeightOfLabel:[[arrayTempComment objectAtIndex:indexPath.row] valueForKey:@"comment_text"]];
             [cellComment.lblForComment setFrame:CGRectMake(50, 25, 250, height)];
         }
-       
+        
         [cellComment.starRate setStrImage:@"star_small.png"];
         [cellComment.starRate setStrStarActImage:@"star_active_small.png"];
- 
+        
         
         if ([[arrayTempComment objectAtIndex:indexPath.row]
              valueForKey:@"comment_rating"]!=[NSNull null]) {
@@ -590,8 +632,8 @@
         if ([arrayTempComment count]>0 && indexPath.row==([arrayTempComment count]-1)) {
             if ([[[arrayTempComment objectAtIndex:0] valueForKey:@"comment_count"] intValue]>2) {
                 [cellComment.btnForSeemore setFrame:CGRectMake(112, height, 75, 30)];
-                 cellComment.btnForSeemore.tag=index;
-                 cellComment.btnForSeemore.hidden=NO;
+                cellComment.btnForSeemore.tag=index;
+                cellComment.btnForSeemore.hidden=NO;
                 cellComment.btnForSeemore.userInteractionEnabled=YES;
                 [cellComment.btnForSeemore addTarget:self action:@selector(actionOnSeeMore:) forControlEvents:UIControlEventTouchUpInside];
             }
@@ -609,7 +651,11 @@
     
 	return cell;
 }
+- (void)rtLabel:(id)rtLabel didSelectLinkWithURL:(NSURL*)url{
 
+    NSLog(@" hurrrrrryyyyyyyy *************** %@",url);
+    
+}
 -(void)actionOnZoom:(UIButton*)sender withEvent:(UIEvent*)event{
     UITouch* touch = [[event allTouches] anyObject];
     
@@ -618,14 +664,14 @@
         
     }else if (touch.tapCount == 1){
         
-
-    
-    }
         
+        
+    }
+    
 }
 
 - (void) doSingleTap: (UITapGestureRecognizer *)recognizer{
-
+    
     UIButton *btn=(UIButton*)recognizer.view;
     UIImage *img=[btn.imageView image];
     if (img!=nil) {
@@ -656,7 +702,7 @@
     }else{
         
     }
-
+    
     
 }
 
@@ -675,7 +721,7 @@
     
     [service follow_category:strID friend_user_id:[dicTemp valueForKey:@"user_id"] user_category_id:[dicTemp valueForKey:@"user_category_id"] master_category_id:[dicTemp valueForKey:@"master_category_id"]];
     
-        
+    
 }
 
 
@@ -779,7 +825,7 @@
 
 
 -(void)actionOnSeeMore:(id)sender{
-
+    
     UIButton *btn=(UIButton*)sender;
     NSLog(@"value of Tag SeeMore button******* %d",btn.tag);
     EntityDetailViewController *obj=[[EntityDetailViewController alloc] init];
@@ -810,25 +856,42 @@
 
 
 - (void)scrollViewDidScroll:(UIScrollView *)sender {
-//    if (!pageControlBeingUsed) {
-//        // Switch the indicator when more than 50% of the previous/next page is visible
-//        NSLog(@"value scrollViewDidScroll");
-//    }
+    //    if (!pageControlBeingUsed) {
+    //        // Switch the indicator when more than 50% of the previous/next page is visible
+    //        NSLog(@"value scrollViewDidScroll");
+    //    }
 }
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    
+    
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
     if (scrollView==scrollviewForAllImages) {
         NSLog(@"value of scrolling %f",scrollviewForAllImages.contentOffset.x);
         currentPage = scrollviewForAllImages.contentOffset.x / 320;
-        if ([arrayForData count]>currentPage) {        
+        if ([arrayForData count]>currentPage) {
             //arrayForComment=[[NSMutableArray alloc] initWithArray:[[arrayForData objectAtIndex:currentPage] valueForKey:@"comment"]  copyItems:YES];
-        }    
+        }
+        if (currentPage>0) {
+            
+            NSString *strcaption=[NSString stringWithFormat:@"%@",[[[dicForServerData valueForKey:@"post_info"] objectAtIndex:currentPage-1] valueForKey:@"comment_text"]];
+            caption_Height = [self calculateHeightForCaption: [NSString stringWithFormat:@"<font size=15>%@</font>",strcaption]];
+        }else if (currentPage==0){
+            NSString *strcaption=[NSString stringWithFormat:@"%@",[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"comment_text"]];
+            caption_Height = [self calculateHeightForCaption: [NSString stringWithFormat:@"<font size=15>%@</font>",strcaption]];
+        }
+        [scrollviewForAllImages setFrame:CGRectMake(0, 0, 320, (250+caption_Height))];
+        
+        NSIndexPath* indexPath1 = [NSIndexPath indexPathForRow:0 inSection:0];
+        // Add them in an index path array
+        NSArray* indexArray = [NSArray arrayWithObjects:indexPath1, nil];
+        // Launch reload for the two index path
+        [self.tableViewForDetail reloadRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationFade];
         //[self.tableViewForDetail reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
         [tableViewForDetail reloadData];
     }
-   
+    
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -839,23 +902,26 @@
     }else{
         index=index-1;
     }
-        if (indexPath.section==0) {
-            return 290;
-        }else if (indexPath.section==1 && checkForMapShow==YES){
-            return 300;
-        }else if(index<[arrayForData count]){
-            NSArray *arrayTemp=[arrayForData objectAtIndex:index];
-            NSString *strComment= [[arrayTemp objectAtIndex:indexPath.row] valueForKey:@"comment_text"];
-            int height=(int)[self calculateHeightOfLabel:strComment];
-            
-            if ([arrayTemp count]>0 && indexPath.row==([arrayTemp count]-1)) {
-                if ([[[arrayTemp objectAtIndex:0] valueForKey:@"comment_count"] intValue]>2) {
-                    return height+50;
-                }
+    if (indexPath.section==0) {
+        return 250+caption_Height;
+    }
+    else if (indexPath.section==1 && checkForMapShow==YES){
+        return 300;
+    }
+    else if(index<[arrayForData count]){
+        NSArray *arrayTemp=[arrayForData objectAtIndex:index];
+        NSString *strComment= [[arrayTemp objectAtIndex:indexPath.row] valueForKey:@"comment_text"];
+        NSLog(@"string comment = = = = =%@", strComment);
+        int height=(int)[self calculateHeightOfLabel:strComment];
+        
+        if ([arrayTemp count]>0 && indexPath.row==([arrayTemp count]-1)) {
+            if ([[[arrayTemp objectAtIndex:0] valueForKey:@"comment_count"] intValue]>2) {
+                return height+50;
             }
-            
-            return height;
         }
+        
+        return height;
+    }
     return 0;
 }
 
@@ -871,12 +937,12 @@
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
-   UIView *viewForHeader=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 30)];
+    UIView *viewForHeader=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 30)];
     if (section==0) {
-       return viewForHeader;
-   }else if (section==1 && checkForMapShow==YES){
-       return viewForHeader;
-    }else{        
+        return viewForHeader;
+    }else if (section==1 && checkForMapShow==YES){
+        return viewForHeader;
+    }else{
         
         UIImageView *viewForCommentAndLike=[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 30)];
         viewForCommentAndLike.userInteractionEnabled=YES;
@@ -884,7 +950,9 @@
         [viewForCommentAndLike setBackgroundColor:[UIColor clearColor]];
         [viewForHeader addSubview:viewForCommentAndLike];
         
-        UIButton *btnForComment=[[UIButton alloc] initWithFrame:CGRectMake(5, 2, 70, 25)];
+         UIButton *btnForComment=[[UIButton alloc] initWithFrame:CGRectMake(5, 2, 70, 25)];
+      
+        
         [btnForComment setImage:[UIImage imageNamed:@"commentbtn.png"] forState:UIControlStateNormal];
         [btnForComment.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
         [btnForComment setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -906,17 +974,17 @@
         [btnForShare addTarget:self action:@selector(actionOnShare:) forControlEvents:UIControlEventTouchUpInside];
         [viewForCommentAndLike addSubview:btnForShare];
         
-        
-        UIButton *btnForLocation=[[UIButton alloc] initWithFrame:CGRectMake(250, 2, 30, 25)];
-        [btnForLocation setImage:[UIImage imageNamed:@"location.png"] forState:UIControlStateNormal];
-        [btnForLocation.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
-        [btnForLocation setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [btnForLocation setBackgroundColor:[UIColor clearColor]];
-        btnForLocation.layer.cornerRadius=5;
-        btnForComment.tag=section;
-        btnForLocation.layer.masksToBounds=YES;
-        [btnForLocation addTarget:self action:@selector(actionOnlat:event:) forControlEvents:UIControlEventTouchUpInside];
-        [viewForCommentAndLike addSubview:btnForLocation];
+//        
+//        UIButton *btnForLocation=[[UIButton alloc] initWithFrame:CGRectMake(260, 2, 30, 25)];
+//        [btnForLocation setImage:[UIImage imageNamed:@"location.png"] forState:UIControlStateNormal];
+//        [btnForLocation.titleLabel setFont:[UIFont boldSystemFontOfSize:12]];
+//        [btnForLocation setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//        [btnForLocation setBackgroundColor:[UIColor clearColor]];
+//        btnForLocation.layer.cornerRadius=5;
+//        btnForComment.tag=section;
+//        btnForLocation.layer.masksToBounds=YES;
+//        [btnForLocation addTarget:self action:@selector(actionOnlat:event:) forControlEvents:UIControlEventTouchUpInside];
+//        [viewForCommentAndLike addSubview:btnForLocation];
         
         
         UIButton *btnForLiik=[[UIButton alloc] initWithFrame:CGRectMake(285, 2, 30, 25)];
@@ -931,12 +999,12 @@
         [viewForCommentAndLike addSubview:btnForLiik];
         
         return viewForHeader;
-
+        
     }
     return viewForHeader;
 }
 -(void)actionOnComment:(id)sender{
-
+    
     UIButton *btn=(UIButton*)sender;
     CommentViewController *obj=[[CommentViewController alloc] init];
     NSLog(@"btn tag in section %d",btn.tag);
@@ -950,22 +1018,22 @@
     }
     
     if (index==0) {
-
-            obj.dicForDetail=[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0];
-            obj.strForEntity=@"entity";           
-
+        
+        obj.dicForDetail=[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0];
+        obj.strForEntity=@"entity";
+        
     }else if (index>0){
-            
-            NSArray *array=[dicForServerData valueForKey:@"post_info"];
-            if (index-1<[array count]) {
+        
+        NSArray *array=[dicForServerData valueForKey:@"post_info"];
+        if (index-1<[array count]) {
             obj.dicForDetail=[array objectAtIndex:index-1];
-            }        
+        }
     }
     [self.navigationController pushViewController:obj animated:YES];
 }
 
 -(void)actionOnlikker:(id)sender{
-
+    
     LikkerViewConotroller *obj=[[LikkerViewConotroller alloc] init];
     UIButton *btn=(UIButton*)sender;
     NSLog(@"btn tag in section %d",btn.tag);
@@ -982,7 +1050,7 @@
     if (index==0) {
         
         obj.strForCategoryId=[[[dicForServerData valueForKey:@"entity_info"] objectAtIndex:0] valueForKey:@"user_entity_id"];
-                
+        
     }else if (index>0){
         
         NSArray *array=[dicForServerData valueForKey:@"post_info"];
@@ -991,13 +1059,13 @@
             //obj.strForUserID=[[array objectAtIndex:index-1] valueForKey:@"user_id"];
         }
     }
-
+    
     
     [self.navigationController pushViewController:obj animated:YES];
     
 }
 -(void)actionOnShare:(id)sender{
-
+    
     UIButton *btn=(UIButton*)sender;
     
     int index =btn.tag;
@@ -1017,10 +1085,10 @@
         obj.strForEntity=@"post";
         NSArray *array=[dicForServerData valueForKey:@"post_info"];
         if (index-1<[array count]) {
-        obj.dicForDetail=[array objectAtIndex:index-1];
+            obj.dicForDetail=[array objectAtIndex:index-1];
         }
     }
-
+    
     [self.navigationController pushViewController:obj animated:YES];
     
 }
@@ -1030,15 +1098,15 @@
         checkForMapShow=NO;
     }else{
         checkForMapShow=YES;
-    }    
-//    NSSet *touches = [event allTouches];
-//    UITouch *touch = [touches anyObject];
-//    CGPoint currentTouchPosition = [touch locationInView:self.tableViewForDetail];
-//    NSIndexPath *indexPath = [self.tableViewForDetail indexPathForRowAtPoint: currentTouchPosition];
-//    if (indexPath != nil)
-//    {
-//        [self.tableViewForDetail reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-//    }
+    }
+    //    NSSet *touches = [event allTouches];
+    //    UITouch *touch = [touches anyObject];
+    //    CGPoint currentTouchPosition = [touch locationInView:self.tableViewForDetail];
+    //    NSIndexPath *indexPath = [self.tableViewForDetail indexPathForRowAtPoint: currentTouchPosition];
+    //    if (indexPath != nil)
+    //    {
+    //        [self.tableViewForDetail reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    //    }
     [tableViewForDetail reloadData];
 }
 
@@ -1076,7 +1144,7 @@
     // Boilerplate pin annotation code
     
     if ([annotation isKindOfClass:[MKUserLocation class]]) {
-        return nil;                
+        return nil;
     }
     MKPinAnnotationView *pin = (MKPinAnnotationView *) [MapViewForLocation dequeueReusableAnnotationViewWithIdentifier: @"restMap"];
     if (pin == nil) {
@@ -1093,13 +1161,22 @@
 
 
 -(float)calculateHeightOfLabel:(NSString*)text{
-    RTLabel *lblForHeight=[[RTLabel alloc] initWithFrame:CGRectMake(0, 0, 250, 1000)];
+    RTLabel *lblForHeight=[[RTLabel alloc] initWithFrame:CGRectMake(0, 0, 250, 99999)];
     [lblForHeight setText:text];
     CGSize optimumSize = [lblForHeight optimumSize];
-    if (optimumSize.height<20) {
-        return 20+55;
+    if (optimumSize.height<10) {
+        return 20+20;
     }
-    return optimumSize.height+55;
+    return optimumSize.height+45;
+}
+-(float)calculateHeightForCaption:(NSString*)text{
+    RTLabel *lblForHeight=[[RTLabel alloc] initWithFrame:CGRectMake(0, 0, 300, 99999)];
+    [lblForHeight setText:text];
+    CGSize optimumSize = [lblForHeight optimumSize];
+    if (optimumSize.height<10) {
+        return 20+20;
+    }
+    return optimumSize.height+10;
 }
 
 -(IBAction)actionOnBack:(id)sender{
@@ -1133,4 +1210,13 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (IBAction)actionOnMap:(id)sender {
+    
+    MapForCurrentLocationViewController *objj = [[MapForCurrentLocationViewController alloc]init];
+    objj.serverData = dicForServerData;
+    NSLog(@"server data  - - - - - - - %@", objj
+          .serverData);
+    [self.navigationController pushViewController:objj animated:YES];
+    NSLog(@"Hello i m here ???????");
+}
 @end

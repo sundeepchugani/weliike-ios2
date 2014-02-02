@@ -25,6 +25,7 @@
     UIButton *btnForFb;
     NSDictionary *dicForDetail;
     BOOL FBSharing,TwitterSharing;
+     BOOL checkKeyBoard;
 }
 @property(nonatomic,retain)NSDictionary *dicForDetail;
 @property(nonatomic,retain)IBOutlet UIButton *btnForFb;

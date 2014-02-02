@@ -32,10 +32,101 @@
 
 @implementation UITabBarController (hidable)
 
+//- (void)setTabBarHidden:(BOOL)hidden animated:(BOOL)animated
+//{
+//    //NSLog(@"setTabBarHidden:%d animated:%d", hidden, animated);
+//    AppDelegate *delegate=(AppDelegate*)[UIApplication sharedApplication].delegate;
+//    
+//	if ( [self.view.subviews count] < 2 )
+//		return;
+//	
+//	UIView *contentView;
+//    
+//	if ( [[self.view.subviews objectAtIndex:0] isKindOfClass:[UITabBar class]] )
+//		contentView = [self.view.subviews objectAtIndex:1];
+//	else
+//		contentView = [self.view.subviews objectAtIndex:0];
+//	
+//    //NSLog(@"height %f and width %f",self.view.frame.size.height,self.view.frame.size.width);
+//    if(hidden)
+//    {
+//        
+//        delegate.btnPost.hidden=YES;
+//        if(animated)
+//        {
+//            //NSLog(@"HIDDEN - ANIMATED");
+//            
+//            [UIView animateWithDuration:0.2 
+//                             animations:^{
+//                                // contentView.frame = CGRectMake(0, 0, 320, 480);
+//                                 
+//                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
+//                                                                self.view.bounds.size.height+49, 
+//                                                                self.view.bounds.size.width, 
+//                                                                TABBAR_HEIGHT);
+//                             }
+//                             completion:^(BOOL finished) {
+//                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
+//                                                                self.view.bounds.size.height+49, 
+//                                                                self.view.bounds.size.width, 
+//                                                                0);
+//                             }];
+//        }
+//        else 
+//        {
+//            //NSLog(@"HIDDEN");
+//            
+//            contentView.frame = self.view.bounds;
+//            
+//            self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
+//                                           self.view.bounds.size.height, 
+//                                           self.view.bounds.size.width, 
+//                                           0);
+//            
+//        }
+//    }
+//    else 
+//    {
+//        delegate.btnPost.hidden=NO;
+//        self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
+//                                       self.view.bounds.size.height, 
+//                                       self.view.bounds.size.width, 
+//                                       TABBAR_HEIGHT);
+//
+//        if(animated)
+//        {
+//            //NSLog(@"NOT HIDDEN - ANIMATED");
+//            [UIView animateWithDuration:0.2 
+//                             animations:^{
+//                                 contentView.frame = CGRectMake(self.view.bounds.origin.x,
+//                                                                self.view.bounds.origin.y,
+//                                                                self.view.bounds.size.width,
+//                                                                self.view.bounds.size.height - TABBAR_HEIGHT);
+//                                 
+//                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
+//                                                                self.view.bounds.size.height - TABBAR_HEIGHT, 
+//                                                                self.view.bounds.size.width, 
+//                                                                TABBAR_HEIGHT);         
+//                             }];
+//        }
+//        else 
+//        {
+//            NSLog(@"NOT HIDDEN");
+//            contentView.frame = CGRectMake(self.view.bounds.origin.x,
+//                                           self.view.bounds.origin.y,
+//                                           self.view.bounds.size.width,
+//                                           self.view.bounds.size.height - TABBAR_HEIGHT);
+//            
+//            self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
+//                                           self.view.bounds.size.height - TABBAR_HEIGHT, 
+//                                           self.view.bounds.size.width, 
+//                                           TABBAR_HEIGHT);          
+//        }        
+//    }
+//}
 - (void)setTabBarHidden:(BOOL)hidden animated:(BOOL)animated
 {
-    //NSLog(@"setTabBarHidden:%d animated:%d", hidden, animated);
-    AppDelegate *delegate=(AppDelegate*)[UIApplication sharedApplication].delegate;
+    NSLog(@"setTabBarHidden:%d animated:%d", hidden, animated);
     
 	if ( [self.view.subviews count] < 2 )
 		return;
@@ -47,69 +138,64 @@
 	else
 		contentView = [self.view.subviews objectAtIndex:0];
 	
-    //NSLog(@"height %f and width %f",self.view.frame.size.height,self.view.frame.size.width);
+    
     if(hidden)
     {
-        
-        delegate.btnPost.hidden=YES;
         if(animated)
         {
-            //NSLog(@"HIDDEN - ANIMATED");
+            NSLog(@"HIDDEN - ANIMATED");
             
-            [UIView animateWithDuration:0.2 
+            [UIView animateWithDuration:0.2
                              animations:^{
-                                // contentView.frame = CGRectMake(0, 0, 320, 480);
+                                 contentView.frame = self.view.bounds;
                                  
-                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
-                                                                self.view.bounds.size.height+49, 
-                                                                self.view.bounds.size.width, 
+                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x,
+                                                                self.view.bounds.size.height,
+                                                                self.view.bounds.size.width,
                                                                 TABBAR_HEIGHT);
                              }
                              completion:^(BOOL finished) {
-                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
-                                                                self.view.bounds.size.height+49, 
-                                                                self.view.bounds.size.width, 
-                                                                0);
+                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x,
+                                                                self.view.bounds.size.height,
+                                                                self.view.bounds.size.width,
+                                                                TABBAR_HEIGHT);
                              }];
         }
-        else 
+        else
         {
-            //NSLog(@"HIDDEN");
+            NSLog(@"HIDDEN");
             
             contentView.frame = self.view.bounds;
             
-            self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
-                                           self.view.bounds.size.height, 
-                                           self.view.bounds.size.width, 
-                                           0);
-            
+            self.tabBar.frame = CGRectMake(self.view.bounds.origin.x,
+                                           self.view.bounds.size.height,
+                                           self.view.bounds.size.width,
+                                           TABBAR_HEIGHT);
         }
     }
-    else 
+    else
     {
-        delegate.btnPost.hidden=NO;
-        self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
-                                       self.view.bounds.size.height, 
-                                       self.view.bounds.size.width, 
-                                       TABBAR_HEIGHT);
-
+        self.tabBar.frame = CGRectMake(self.view.bounds.origin.x,
+                                       self.view.bounds.size.height,
+                                       self.view.bounds.size.width,
+                                       0);
         if(animated)
         {
-            //NSLog(@"NOT HIDDEN - ANIMATED");
-            [UIView animateWithDuration:0.2 
+            NSLog(@"NOT HIDDEN - ANIMATED");
+            [UIView animateWithDuration:0.2
                              animations:^{
+                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x,
+                                                                self.view.bounds.size.height - TABBAR_HEIGHT,
+                                                                self.view.bounds.size.width,
+                                                                TABBAR_HEIGHT);
+                             }   completion:^(BOOL finished) {
                                  contentView.frame = CGRectMake(self.view.bounds.origin.x,
                                                                 self.view.bounds.origin.y,
                                                                 self.view.bounds.size.width,
                                                                 self.view.bounds.size.height - TABBAR_HEIGHT);
-                                 
-                                 self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
-                                                                self.view.bounds.size.height - TABBAR_HEIGHT, 
-                                                                self.view.bounds.size.width, 
-                                                                TABBAR_HEIGHT);         
                              }];
         }
-        else 
+        else
         {
             NSLog(@"NOT HIDDEN");
             contentView.frame = CGRectMake(self.view.bounds.origin.x,
@@ -117,12 +203,11 @@
                                            self.view.bounds.size.width,
                                            self.view.bounds.size.height - TABBAR_HEIGHT);
             
-            self.tabBar.frame = CGRectMake(self.view.bounds.origin.x, 
-                                           self.view.bounds.size.height - TABBAR_HEIGHT, 
-                                           self.view.bounds.size.width, 
-                                           TABBAR_HEIGHT);          
-        }        
+            self.tabBar.frame = CGRectMake(self.view.bounds.origin.x,
+                                           self.view.bounds.size.height - TABBAR_HEIGHT,
+                                           self.view.bounds.size.width,
+                                           TABBAR_HEIGHT);
+        }
     }
 }
-
 @end

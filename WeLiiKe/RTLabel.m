@@ -1,39 +1,3 @@
-//
-//  RTLabel.m
-//  RTLabelProject
-//
-/**
- * Copyright (c) 2010 Muh Hon Cheng
- * Created by honcheng on 1/6/11.
- * 
- * Permission is hereby granted, free of charge, to any person obtaining 
- * a copy of this software and associated documentation files (the 
- * "Software"), to deal in the Software without restriction, including 
- * without limitation the rights to use, copy, modify, merge, publish, 
- * distribute, sublicense, and/or sell copies of the Software, and to 
- * permit persons to whom the Software is furnished to do so, subject 
- * to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be 
- * included in all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT 
- * WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR 
- * PURPOSE AND NONINFRINGEMENT. IN NO EVENT 
- * SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
- * IN CONNECTION WITH THE SOFTWARE OR 
- * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * @author 		Muh Hon Cheng <honcheng@gmail.com>
- * @copyright	2011	Muh Hon Cheng
- * @version
- * 
- */
 
 #import "RTLabel.h"
 
@@ -308,7 +272,7 @@
 				else
 				{
 					[self applyBoldStyleToText:attrString atPosition:component.position withLength:[component.text length]];
-					[self applySingleUnderlineText:attrString atPosition:component.position withLength:[component.text length]];
+					//[self applySingleUnderlineText:attrString atPosition:component.position withLength:[component.text length]];
 				}
 			}
 			
@@ -321,20 +285,20 @@
 		else if ([component.tagLabel isEqualToString:@"u"] || [component.tagLabel isEqualToString:@"uu"])
 		{
 			// underline
-			if ([component.tagLabel isEqualToString:@"u"])
-			{
-				[self applySingleUnderlineText:attrString atPosition:component.position withLength:[component.text length]];
-			}
-			else if ([component.tagLabel isEqualToString:@"uu"])
-			{
-				[self applyDoubleUnderlineText:attrString atPosition:component.position withLength:[component.text length]];
-			}
-			
-			if ([component.attributes objectForKey:@"color"])
-			{
-				NSString *value = [component.attributes objectForKey:@"color"];
-				[self applyUnderlineColor:value toText:attrString atPosition:component.position withLength:[component.text length]];
-			}
+//			if ([component.tagLabel isEqualToString:@"u"])
+//			{
+//				[self applySingleUnderlineText:attrString atPosition:component.position withLength:[component.text length]];
+//			}
+//			else if ([component.tagLabel isEqualToString:@"uu"])
+//			{
+//				[self applyDoubleUnderlineText:attrString atPosition:component.position withLength:[component.text length]];
+//			}
+//			
+//			if ([component.attributes objectForKey:@"color"])
+//			{
+//				NSString *value = [component.attributes objectForKey:@"color"];
+//				[self applyUnderlineColor:value toText:attrString atPosition:component.position withLength:[component.text length]];
+//			}
 		}
 		else if ([component.tagLabel isEqualToString:@"font"])
 		{
@@ -397,10 +361,10 @@
 					float button_width = primaryOffset2 - primaryOffset;
 					
 					RTLabelButton *button = [[RTLabelButton alloc] initWithFrame:CGRectMake(primaryOffset, height, button_width, ascent+descent)];
-					
+					//[button setTitleColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0] forState:UIControlStateNormal];//139-137-137
+                    //[button setTitleColor:[UIColor colorWithRed:139.0/255.0 green:137.0/255.0 blue:137.0/255.0 alpha:1.0] forState:UIControlEventTouchUpInside];
 					[button setBackgroundColor:[UIColor colorWithWhite:0 alpha:0]];
 					[button setComponentIndex:linkableComponents.componentIndex];
-					
 					[button setUrl:[NSURL URLWithString:[linkableComponents.attributes objectForKey:@"href"]]];
 					[button addTarget:self action:@selector(onButtonTouchDown:) forControlEvents:UIControlEventTouchDown];
 					[button addTarget:self action:@selector(onButtonTouchUpOutside:) forControlEvents:UIControlEventTouchUpOutside];
@@ -577,12 +541,12 @@
 
 - (void)applySingleUnderlineText:(CFMutableAttributedStringRef)text atPosition:(int)position withLength:(int)length
 {
-	CFAttributedStringSetAttribute(text, CFRangeMake(position, length), kCTUnderlineStyleAttributeName,  (CFNumberRef)[NSNumber numberWithInt:kCTUnderlineStyleSingle]);
+	//CFAttributedStringSetAttribute(text, CFRangeMake(position, length), kCTUnderlineStyleAttributeName,  (CFNumberRef)[NSNumber numberWithInt:kCTUnderlineStyleSingle]);
 }
 
 - (void)applyDoubleUnderlineText:(CFMutableAttributedStringRef)text atPosition:(int)position withLength:(int)length
 {
-	CFAttributedStringSetAttribute(text, CFRangeMake(position, length), kCTUnderlineStyleAttributeName,  (CFNumberRef)[NSNumber numberWithInt:kCTUnderlineStyleDouble]);
+	//CFAttributedStringSetAttribute(text, CFRangeMake(position, length), kCTUnderlineStyleAttributeName,  (CFNumberRef)[NSNumber numberWithInt:kCTUnderlineStyleDouble]);
 }
 
 - (void)applyItalicStyleToText:(CFMutableAttributedStringRef)text atPosition:(int)position withLength:(int)length
@@ -617,11 +581,11 @@
 			int numberOfLines = [value intValue];
 			if (numberOfLines==1)
 			{
-				[self applySingleUnderlineText:text atPosition:position withLength:length];
+				//[self applySingleUnderlineText:text atPosition:position withLength:length];
 			}
 			else if (numberOfLines==2)
 			{
-				[self applyDoubleUnderlineText:text atPosition:position withLength:length];
+				//[self applyDoubleUnderlineText:text atPosition:position withLength:length];
 			}
 		}
 		else if ([key isEqualToString:@"style"])
@@ -695,27 +659,27 @@
 
 - (void)applyUnderlineColor:(NSString*)value toText:(CFMutableAttributedStringRef)text atPosition:(int)position withLength:(int)length
 {
-	value = [value stringByReplacingOccurrencesOfString:@"'" withString:@""];
-	if ([value rangeOfString:@"#"].location==0) {
-        CGColorSpaceRef rgbColorSpace = CGColorSpaceCreateDeviceRGB();
-		value = [value stringByReplacingOccurrencesOfString:@"#" withString:@"0x"];
-		NSArray *colorComponents = [self colorForHex:value];
-		CGFloat components[] = { [[colorComponents objectAtIndex:0] floatValue] , [[colorComponents objectAtIndex:1] floatValue] , [[colorComponents objectAtIndex:2] floatValue] , [[colorComponents objectAtIndex:3] floatValue] };
-		CGColorRef color = CGColorCreate(rgbColorSpace, components);
-		CFAttributedStringSetAttribute(text, CFRangeMake(position, length),kCTUnderlineColorAttributeName, color);
-		CFRelease(color);
-        CGColorSpaceRelease(rgbColorSpace);
-	} else {
-		value = [value stringByAppendingString:@"Color"];
-		SEL colorSel = NSSelectorFromString(value);
-		UIColor *_color = nil;
-		if ([UIColor respondsToSelector:colorSel]) {
-			_color = [UIColor performSelector:colorSel];
-			CGColorRef color = [_color CGColor];
-			CFAttributedStringSetAttribute(text, CFRangeMake(position, length),kCTUnderlineColorAttributeName, color);
-			//CFRelease(color);
-		}				
-	}
+//	value = [value stringByReplacingOccurrencesOfString:@"'" withString:@""];
+//	if ([value rangeOfString:@"#"].location==0) {
+//        CGColorSpaceRef rgbColorSpace = CGColorSpaceCreateDeviceRGB();
+//		value = [value stringByReplacingOccurrencesOfString:@"#" withString:@"0x"];
+//		NSArray *colorComponents = [self colorForHex:value];
+//		CGFloat components[] = { [[colorComponents objectAtIndex:0] floatValue] , [[colorComponents objectAtIndex:1] floatValue] , [[colorComponents objectAtIndex:2] floatValue] , [[colorComponents objectAtIndex:3] floatValue] };
+//		CGColorRef color = CGColorCreate(rgbColorSpace, components);
+//		CFAttributedStringSetAttribute(text, CFRangeMake(position, length),kCTUnderlineColorAttributeName, color);
+//		CFRelease(color);
+//        CGColorSpaceRelease(rgbColorSpace);
+//	} else {
+//		value = [value stringByAppendingString:@"Color"];
+//		SEL colorSel = NSSelectorFromString(value);
+//		UIColor *_color = nil;
+//		if ([UIColor respondsToSelector:colorSel]) {
+//			_color = [UIColor performSelector:colorSel];
+//			CGColorRef color = [_color CGColor];
+//			CFAttributedStringSetAttribute(text, CFRangeMake(position, length),kCTUnderlineColorAttributeName, color);
+//			//CFRelease(color);
+//		}				
+//	}
 }
 
 #pragma mark -

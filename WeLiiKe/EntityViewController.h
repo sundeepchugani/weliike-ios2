@@ -22,6 +22,7 @@
     HudView *aHUD;
     int pageNo;
 }
+
 @property(nonatomic,retain)IBOutlet  UILabel *labelForName; 
 @property(nonatomic,retain)IBOutlet UIButton *btnForDone;
 @property(nonatomic,retain)NSString *strForCateID,*strForCome;

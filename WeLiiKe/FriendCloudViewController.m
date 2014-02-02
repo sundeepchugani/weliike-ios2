@@ -9,9 +9,12 @@
 #import "FriendCloudViewController.h"
 #import "OtherUserProfile.h"
 
+
+extern NSDictionary *dicForSelectedCate;
+
 @implementation FriendCloudViewController
 
-@synthesize tableForFollowing,strForCategoryId,strForCategoryName,lblForCate,strForClass,arrayForSelectedCategory,btnForNext,strForMasterId;
+@synthesize tableForFollowing,strForCategoryId,strForCategoryName,lblForCate,strForClass,btnForNext,strForMasterId;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -65,6 +68,7 @@
     if ([strForClass isEqualToString:@"AddCate"]) {
         btnForNext.hidden=NO;
     }
+    dicForSelectedUser=[[NSMutableDictionary alloc] init];
     //[self performSelector:@selector(callWebService) withObject:nil afterDelay:0.5];
     
     // Do any additional setup after loading the view from its nib.
@@ -74,8 +78,16 @@
 
     if ([strForClass isEqualToString:@"AddCate"]) {
         
+        if ([dicForSelectedUser count]>0) {
+            [self showHUD];
+            [self callWebserviceAddFriends];
+        }else{
+           
+             dicForSelectedCate=[NSDictionary dictionaryWithObjectsAndKeys:strForCategoryId,@"cateId",strForCategoryName,@"cateName",strForMasterId,@"cateMasterId", nil];
+             [self.navigationController popToRootViewControllerAnimated:YES];
+        }
         
-        [self.navigationController popToRootViewControllerAnimated:YES];
+        
     }else{
     
         EnityUserController *obj=[[EnityUserController alloc] init];
@@ -132,23 +144,23 @@
                 NSLog(@"value of %d",[strForResponce count]);
                 arrayForServerData=[[NSMutableArray alloc] init];
                 arrayForSuggestedUser=[[NSMutableArray alloc] init];
+                NSMutableDictionary *dicTemp=[[NSMutableDictionary alloc] init];
                 
                 for (int i=0; i<[strForResponce count]; i++) {
-                    NSString *strForCateIDMast=[[strForResponce objectAtIndex:i] valueForKey:@"status"];
-                    if ([strForCateIDMast isEqualToString:@"YES"]) {
-                        [arrayForServerData addObject:[strForResponce objectAtIndex:i]];
-                    }else{
-                        NSArray *array = [arrayForServerData valueForKey:@"user_id"];
-                        if (![array containsObject:[[strForResponce objectAtIndex:i] valueForKey:@"user_id"]]) {
-                            
-                            NSArray *array1 = [arrayForSuggestedUser valueForKey:@"user_id"];
-                            if (![array1 containsObject:[[strForResponce objectAtIndex:i] valueForKey:@"user_id"]]) {
-                                [arrayForSuggestedUser addObject:[strForResponce objectAtIndex:i]];
-                            }
-                        }
+                    if ([dicTemp valueForKey:[[strForResponce objectAtIndex:i] valueForKey:@"user_id"]]==nil) {
+                        [dicTemp setValue:[strForResponce objectAtIndex:i] forKey:[[strForResponce objectAtIndex:i] valueForKey:@"user_id"]];
                     }
                 }
                 
+                for(NSString *key in dicTemp) {
+                    NSDictionary *dic=[dicTemp valueForKey:key];
+                    NSString *strForCateIDMast=[dic valueForKey:@"status"];
+                    if ([strForCateIDMast isEqualToString:@"YES"]) {
+                        [arrayForServerData addObject:dic];
+                    }else{
+                        [arrayForSuggestedUser addObject:dic];
+                    }
+                }
                 
                 //NSLog(@"value of aara %@",arrayForServerData);
                 arrayForServerDataForSugested=[[NSMutableArray alloc] initWithArray:(NSArray*)arrayForSuggestedUser];
@@ -217,10 +229,25 @@
             if(range.location != NSNotFound)
                 [arrayForSearchResult addObject:wine];
         }
+//        if ([arrayForServerDataForSugested count]>0) {
+//            [arrayForServerDataForSugested removeAllObjects];
+//        }
+//        for(NSDictionary *wine in arrayForSuggestedUser)
+//        {
+//            NSString *wineName = [wine objectForKey:@"user_name"];
+//            NSRange range = [wineName rangeOfString:textField.text options:NSCaseInsensitiveSearch];
+//            if(range.location != NSNotFound)
+//                [arrayForServerDataForSugested addObject:wine];
+//        }
+        
         [tableForFollowing reloadData];
     }else if ([textField.text length]==1 && [string isEqualToString:@""]){
         [arrayForSearchResult removeAllObjects];
         arrayForSearchResult=[arrayForServerData mutableCopy];
+        
+        [arrayForServerDataForSugested removeAllObjects];
+        arrayForServerDataForSugested=[arrayForSuggestedUser mutableCopy];
+
         [tableForFollowing reloadData];
     }
 
@@ -386,17 +413,37 @@
         
     }else if (indexPath.section==1){
         
-        FollowAndFollowingCell *cell=(FollowAndFollowingCell*)[tableView cellForRowAtIndexPath:indexPath];
-        [cell.lblForCountEntity setTextColor:[UIColor whiteColor]];
-        [cell.lblForCountEntity setBackgroundColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0]];
-        cell.imgBg.hidden=NO;
         
         
-        NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForSuggestedUser objectAtIndex:indexPath.row]];
-        [dic setValue:@"YES" forKey:@"status"];
-        [arrayForSuggestedUser replaceObjectAtIndex:indexPath.row withObject:dic];
-        [arrayForServerDataForSugested replaceObjectAtIndex:indexPath.row withObject:dic];
-        [self callWebserviceFor:indexPath.row];
+        
+//        FollowAndFollowingCell *cell=(FollowAndFollowingCell*)[tableView cellForRowAtIndexPath:indexPath];
+//        [cell.lblForCountEntity setTextColor:[UIColor whiteColor]];
+//        [cell.lblForCountEntity setBackgroundColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0]];
+//        cell.imgBg.hidden=NO;
+        
+        if ([dicForSelectedUser valueForKey:[[arrayForSuggestedUser objectAtIndex:indexPath.row] valueForKey:@"user_id"]]==nil) {
+            NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForSuggestedUser objectAtIndex:indexPath.row]];
+            [dic setValue:@"YES" forKey:@"status"];
+            
+            [dicForSelectedUser setValue:dic forKey:[dic valueForKey:@"user_id"]];
+            
+            [arrayForSuggestedUser replaceObjectAtIndex:indexPath.row withObject:dic];
+            [arrayForServerDataForSugested replaceObjectAtIndex:indexPath.row withObject:dic];
+
+        }else{
+        
+            NSMutableDictionary *dic=[[NSMutableDictionary alloc] initWithDictionary:[arrayForSuggestedUser objectAtIndex:indexPath.row]];
+            [dic setValue:@"NO" forKey:@"status"];
+            
+            [dicForSelectedUser setValue:nil forKey:[dic valueForKey:@"user_id"]];
+            
+            [arrayForSuggestedUser replaceObjectAtIndex:indexPath.row withObject:dic];
+            [arrayForServerDataForSugested replaceObjectAtIndex:indexPath.row withObject:dic];
+           
+        }
+                
+        [self.tableForFollowing reloadData];
+        //[self callWebserviceFor:indexPath.row];
         
     }
     
@@ -416,6 +463,7 @@
         [imgViewForBg setImage:[UIImage imageNamed:@"nav_bottom_bar.png"]];
         [viewForHeader addSubview:imgViewForBg];
         //search_bar
+        
         UILabel *lblForAddress=[[UILabel alloc] initWithFrame:CGRectMake(5, 0, 200, 30)];
         [lblForAddress setText:@"SUGGESTED"];
         [lblForAddress setFont:[UIFont boldSystemFontOfSize:14]];
@@ -497,15 +545,22 @@
 
 
 
--(void)callWebserviceFor:(int)index{
+-(void)callWebserviceAddFriends{
     
     WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(addFriendByCategoryHandler:)];
     NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
-    NSString *strFriendID=[[arrayForSuggestedUser objectAtIndex:index] valueForKey:@"user_id"];
     
-        [[arrayForSuggestedUser objectAtIndex:index] setValue:@"added" forKey:@"checked"];
-        [tableForFollowing reloadData];
-        [service addFriendByCategory:strID friend_user_id:strFriendID user_category_id:strForCategoryId];
+    NSMutableArray *arrayForUserID=[NSMutableArray array];
+    
+    for (NSString *key in dicForSelectedUser) {
+        [arrayForUserID addObject:key];
+    }
+    NSString *strForFriendsKey=[arrayForUserID componentsJoinedByString:@","];
+    [dicForSelectedUser removeAllObjects];
+    //NSString *strFriendID=[[arrayForSuggestedUser objectAtIndex:index] valueForKey:@"user_id"];
+    //[[arrayForSuggestedUser objectAtIndex:index] setValue:@"added" forKey:@"checked"];
+    //    [tableForFollowing reloadData];
+        [service addFriendByCategory:strID friend_user_id:strForFriendsKey user_category_id:strForCategoryId];
 }
 
 -(void)addFriendByCategoryHandler:(id)sender{
@@ -531,7 +586,16 @@
             [self killHUD];
             NSLog(@"value of str for %@",strForResponce);
             if ([strForResponce count]>0) {
-                [self performSelector:@selector(callWebService) withObject:nil afterDelay:0.2];
+
+                 
+                //                obj.strForCategoryId=[[arrayForCateSelected objectAtIndex:0] valueForKey:@"user_category_id"];
+//                obj.strForCategoryName=[[arrayForCateSelected objectAtIndex:0] valueForKey:@"user_category_name"];
+//                obj.strForMasterId=[[arrayForCateSelected objectAtIndex:0] valueForKey:@"master_category_id"];
+                
+                dicForSelectedCate=[NSDictionary dictionaryWithObjectsAndKeys:strForCategoryId,@"cateId",strForCategoryName,@"cateName",strForMasterId,@"cateMasterId", nil];
+                
+                [self.navigationController popToRootViewControllerAnimated:YES];
+                //[self performSelector:@selector(callWebService) withObject:nil afterDelay:0.2];
             }else{
                 //[arrayForServerData removeAllObjects];
                 [tableForFollowing reloadData];
@@ -542,7 +606,7 @@
                                            cancelButtonTitle:@"OK"
                                            otherButtonTitles:nil];
                 [errorAlert show];
-                
+                [self.navigationController popToRootViewControllerAnimated:YES];
             }
 
             

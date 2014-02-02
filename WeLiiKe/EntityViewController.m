@@ -62,13 +62,9 @@ extern int countSelectedCategory;
 }
 
 -(IBAction)actionOnBack:(id)sender{
-    
-            NSArray *array=self.navigationController.viewControllers;
-            int countView=[array count];
-            countView=countView-4;
-            [self.navigationController popToViewController:[array objectAtIndex:[array count]-countView] animated:YES];
-   // countSelectedCategory=countSelectedCategory+1;
-   // [self.navigationController popViewControllerAnimated:YES];
+
+    [self.navigationController popViewControllerAnimated:YES];
+  
 }
 
 #pragma mark - search bar delegates
@@ -254,9 +250,9 @@ extern int countSelectedCategory;
     if (countSelectedCategory>0) {
         
     WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(GetEntityByCategoryHandler:)];
-    int countObj=[arrayForCateSelected count]-countSelectedCategory;
+          int countObj=[arrayForCateSelected count]-countSelectedCategory;
     labelForName.text=[[arrayForCateSelected objectAtIndex:countObj] valueForKey:@"user_category_name"];
-    [service GetEntityByCategory:[[arrayForCateSelected objectAtIndex:countObj] valueForKey:@"master_category_id"] page:[NSString stringWithFormat:@"%d",pageNo]];
+        [service GetEntityByCategory:[[arrayForCateSelected objectAtIndex:countObj] valueForKey:@"master_category_id"] page:[NSString stringWithFormat:@"%d",pageNo] user_id:[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"]];
     }else{
         labelForName.text=@"";
        [arrayForServerData removeAllObjects];
@@ -361,6 +357,7 @@ extern int countSelectedCategory;
 
 - (void)viewDidUnload
 {
+
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -480,7 +477,7 @@ extern int countSelectedCategory;
                 
                 cell.image1.tag=(indexPath.row *3)+i;
                 cell.image1.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                cell.image1.layer.borderWidth=1.5;
+                cell.image1.layer.borderWidth=0;
                 [cell.image1 loadImage:str];
                 cell.imgViewForGra1.hidden=NO;
                 //[cell.image1 setImage:[UIImage imageNamed:@"Splash1.png"] forState:UIControlStateNormal];
@@ -522,7 +519,7 @@ extern int countSelectedCategory;
                 [cell.image2 loadImage:str];
                 cell.imgViewForGra2.hidden=NO;
                 cell.image2.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                cell.image2.layer.borderWidth=1.5;
+                cell.image2.layer.borderWidth=0;
                 [cell.image2 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                 
                 [cell.image2 setTitle:[[arrayForServerData objectAtIndex:(indexPath.row *3)+i] valueForKey:@"entity_id"] forState:UIControlStateNormal];
@@ -558,7 +555,7 @@ extern int countSelectedCategory;
                 
                 [cell.image3 loadImage:str];
                 cell.image3.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                cell.image3.layer.borderWidth=1.5;
+                cell.image3.layer.borderWidth=0;
                 cell.imgViewForGra3.hidden=NO;
                 [cell.image3 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                 

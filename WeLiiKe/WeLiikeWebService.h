@@ -26,7 +26,7 @@
 -(void)AddFriend:(NSString*)friends_id facebook_id:(NSString*)facebook_id  user_id:(NSString*)user_id;
 
 -(void)AddFriendEmail:(NSString*)friendsEmail_id user_id:(NSString*)user_id;
--(void)GetEntityByCategory:(NSString*)master_category_id page:(NSString*)page;
+-(void)GetEntityByCategory:(NSString*)master_category_id page:(NSString*)page user_id:(NSString*)user_id;
 
 -(void)AddCategory:(NSString*)master_category_id user_id:(NSString*)user_id;
 -(void)LoginUser:(NSString*)email Password:(NSString*)password;
@@ -39,7 +39,7 @@
 
 //curl -X POST -d "api_id=43$%&entity_name=Yogesh&comment=&address=1224&lat=22.12548&longitude=72.12489&master_category_id=5130ad0df7e4f30efe000001&entity_image=&user_id=51502b8df7e4f3ef9b000002&user_category_id=5140075bf7e4f34bd1000002&rating_count=5&group_id=&email_list=yogesh.waghmare@techvalens.com,deepak.jsadon@techvalens.com&is_new_message=1&messages=1&message_body=Hi everyone&receiver_id=51502b8df7e4f3ef9b000002" http://localhost:3000/user_entity/save_media.json
 
--(void)saveMedia:(NSString *)entity_name comment:(NSString*)comment address:(NSString*)address lat:(NSString*)lat longitude:(NSString*)longitude master_category_id:(NSString*)master_category_id entity_image:(NSString*)entity_image user_id:(NSString*)user_id user_category_id:(NSString*)user_category_id api_id:(NSString*)api_id rating_count:(NSString*)rating_count group_id:(NSString*)group_id email:(NSString*)email receiver_id:(NSString*)receiver_id feed:(NSString*)feed sub_category:(NSString*)sub_category city:(NSString*)city;
+-(void)saveMedia:(NSString *)entity_name comment:(NSString*)comment address:(NSString*)address lat:(NSString*)lat longitude:(NSString*)longitude master_category_id:(NSString*)master_category_id entity_image:(NSString*)entity_image user_id:(NSString*)user_id user_category_id:(NSString*)user_category_id api_id:(NSString*)api_id rating_count:(NSString*)rating_count group_id:(NSString*)group_id email:(NSString*)email receiver_id:(NSString*)receiver_id feed:(NSString*)feed sub_category:(NSString*)sub_category city:(NSString*)city def:(BOOL)def is_active:(BOOL)is_active;
 
 -(void)addFriendByCategory:(NSString *)user_id friend_user_id:(NSString*)friend_user_id user_category_id:(NSString*)user_category_id;
 
@@ -118,7 +118,7 @@
 -(void)getEntityByCategoryIDOther:(NSString *)user_id user_category_id:(NSString*)user_category_id page:(NSString*)page;
 -(void)entity_search_sign_up:(NSString*)master_category_id searchString:(NSString*)searchString;
 -(void)add_facebook_id:(NSString*)user_id facebook_id:(NSString*)facebook_id;
--(void)news_feed1:(NSString*)page;
+-(void)news_feed1:(NSString*)page userID:(NSString*)uid;
 -(void)categoryList;
 -(void)search_friend_on_people:(NSString*)user_id user_name:(NSString*)user_name;
 -(void)get_city_and_sub_category:(NSString*)user_id user_category_id:(NSString*)user_category_id search:(NSString*)search master_category_id:(NSString*)master_category_id;

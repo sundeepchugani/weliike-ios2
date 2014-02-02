@@ -62,11 +62,17 @@
     [imgViewProfile setClipsToBounds:YES];
     [scrollViewForRegi setContentSize:CGSizeMake(320, 400)];
     
-    UITapGestureRecognizer *tapgesture_on_imgViewProfile = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(actionOnCamera:)];
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
+                                   initWithTarget:self
+                                   action:@selector(dismissKeyboard)];
+//    tap.delegate = self;
+    [self.scrollViewForRegi addGestureRecognizer:tap];
+       UITapGestureRecognizer *tapgesture_on_imgViewProfile = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(actionOnCamera:)];
     tapgesture_on_imgViewProfile.delegate = self;
     tapgesture_on_imgViewProfile.numberOfTapsRequired=1;
     [imgViewProfile addGestureRecognizer:tapgesture_on_imgViewProfile];
    
+
     //    txtViewForName.layer.borderWidth=2;
     //    txtViewForName.layer.borderColor=[UIColor grayColor].CGColor;
     //
@@ -81,7 +87,20 @@
     
     // Do any additional setup after loading the view from its nib.
 }
+-(void)dismissKeyboard {
+    [scrollViewForRegi setContentSize:CGSizeMake(320, 400)];
+    [txtViewForpassword resignFirstResponder];
+    
+}
 
+-(void)viewWillAppear:(BOOL)animated{
+    if (checkForImage==1) {
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Upload Images" message:@"Now Upload a Cover Photo" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ok", nil];
+        [alert show];
+        
+    }
+
+}
 - (void)viewDidUnload
 {
     [super viewDidUnload];
@@ -390,10 +409,18 @@
 
 -(IBAction)actionOnCamera:(id)sender{
     if (checkForImage==0) {
-        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Upload Images" message:@"Upload Profile and Cover picture" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ok", nil];
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Upload Images" message:@"Upload a Profile Photo" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ok", nil];
         [alert show];
         
-    }else{
+    }
+    else if (checkForImage==1) {
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Upload Images" message:@"Now Upload a Cover Photo" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ok", nil];
+//        alert.a = UIActionSheetStyleDefault;
+//        menu.actionSheetStyle = UIActionSheetStyleDefault;
+        [alert show];
+        
+    }
+        else{
         UIActionSheet *aSheet=[[UIActionSheet alloc] initWithTitle:@"How would you like to set your cover?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Take Picture",@"Choose Picture",nil ];
         [aSheet showInView:[UIApplication sharedApplication].keyWindow];
     }
@@ -452,13 +479,13 @@
     if (checkForImage==0) {
         //checkForImage=1;
         obj.sizeForCrop=CGRectMake(60, 55, 200, 350);
-        obj.s = @"Profile Image";
+        obj.s = @"Profile";
         
         imgViewProfile.image=imgFinal;
     }else{
         //checkForImage=0;
         obj.sizeForCrop=CGRectMake(0, 130, 320, 150);
-        obj.s = @"Cover Image";
+        obj.s = @"Cover";
         imageForCover=imgFinal;
     }
     
@@ -494,7 +521,7 @@
     return YES;
 }
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
-    if (textField==txtViewForpassword || textField==txtViewForEmail){
+    if (textField==txtViewForpassword ){
         //        CGPoint currentCenter = [self.view center];
         //        CGPoint newCenter = CGPointMake(currentCenter.x, currentCenter.y - 150);
         //        [UIView beginAnimations:nil context:NULL];
@@ -506,6 +533,19 @@
         [scrollViewForRegi setContentOffset:CGPointMake(0, 80) animated:YES];
         return YES;
     }
+    if ( textField==txtViewForEmail){
+        //        CGPoint currentCenter = [self.view center];
+        //        CGPoint newCenter = CGPointMake(currentCenter.x, currentCenter.y - 150);
+        //        [UIView beginAnimations:nil context:NULL];
+        //        [UIView setAnimationDuration:0.5];
+        //        [self.view setCenter:newCenter];
+        //        [UIView commitAnimations];
+        
+        [scrollViewForRegi setContentSize:CGSizeMake(320, 550)];
+        [scrollViewForRegi setContentOffset:CGPointMake(0, 100) animated:YES];
+        return YES;
+    }
+
     return YES;
 }
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField{
@@ -524,6 +564,11 @@
     return YES;
 }
 
+//-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+//{
+//    [self.scrollViewForRegi endEditing:YES];
+//    NSLog(@"i m in tou a ");
+//}
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations

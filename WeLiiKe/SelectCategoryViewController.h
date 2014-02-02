@@ -11,6 +11,7 @@
 #import "CategoryAddCell.h"
 #import "HudView.h"
 
+
 @interface SelectCategoryViewController : UIViewController
 {
     UITableView *tableViewForCategory;
@@ -18,6 +19,9 @@
     BOOL checkSeeMore;
     HudView *aHUD;
 }
+@property (strong, nonatomic) IBOutlet UIButton *can;
+
 @property(nonatomic,retain)IBOutlet UITableView *tableViewForCategory;
+- (void) dataDownloadComplete:(NSNotification *)notif;
 -(IBAction)actionOnCancel:(id)sender;
 @end

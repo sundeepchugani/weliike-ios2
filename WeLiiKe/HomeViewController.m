@@ -14,10 +14,14 @@
 #import "AddGroupViewController.h"
 #import "zoomViewController.h"
 #import "MessagesViewController.h"
+#import "TJSpinner.h"
 
 extern BOOL checkForSignUp;
+//********************** Selecte category **********************
+NSDictionary *dicForSelectedCate;
+extern NSDictionary *dicForCategorySelected;
 @implementation HomeViewController
-@synthesize tableViewForCategoty,lblForTitle;
+@synthesize tableViewForCategoty,lblForTitle,spinner;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -49,7 +53,9 @@ extern BOOL checkForSignUp;
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     }
 }
-
+//-(void)stopSpinner{
+//    [spinner stopAnimating];
+//}
 
 - (void)didReceiveMemoryWarning
 {
@@ -64,8 +70,18 @@ extern BOOL checkForSignUp;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+     spinner = [[TJSpinner alloc] initWithSpinnerType:kTJSpinnerTypeActivityIndicator];
+    [spinner setCenter:CGPointMake(125, (self.view.frame.size.height)/100*(80)-(spinner.frame.size.height))];
+    [spinner setColor:[UIColor darkGrayColor]];
+    [spinner setStrokeWidth:20];
+    [spinner setInnerRadius:5];
+    [spinner setOuterRadius:25];
+    [spinner setNumberOfStrokes:8];
+    spinner.hidesWhenStopped = NO;
+    [spinner setPatternStyle:TJActivityIndicatorPatternStylePetal];
+    [self.view addSubview:spinner];
     
-    if (checkForSignUp==YES) {
+     if (checkForSignUp==YES) {
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"popEntity"];
         [self performSelector:@selector(makeTopAlert) withObject:nil afterDelay:1.0];
     }    
@@ -79,7 +95,32 @@ extern BOOL checkForSignUp;
     //[self performSelector:@selector(callService)];
     // Do any additional setup after loading the view from its nib.
 }
+-(void)viewWillAppear:(BOOL)animated{
+    AppDelegate *delegate=(AppDelegate*)[UIApplication sharedApplication].delegate;
+    delegate.navControllerApp.navigationBar.hidden=YES;
+    self.navigationController.navigationBar.hidden=YES;
+    if ([dicForCategorySelected count]>0) {
+        dicForCategorySelected=nil;
+    }
+    if (dicForSelectedCate!=nil) {
+        
+        EnityUserController *obj=[[EnityUserController alloc] init];
+        obj.strForCateID=[dicForSelectedCate valueForKey:@"cateId"];
+        obj.strForCateName=[dicForSelectedCate valueForKey:@"cateName"];
+        obj.strForMastCateID=[dicForSelectedCate valueForKey:@"cateMasterId"];
+        dicForSelectedCate=nil;
+        [self.navigationController pushViewController:obj animated:YES];
+        return;
+    }
+    
+    //[self showHUD];
+    [spinner startAnimating];
+    [self performSelector:@selector(callupdate_sort_setting) withObject:nil afterDelay:0.1];
+    [self performSelector:@selector(callArrangeTop) withObject:nil afterDelay:0.2];
+    [self performSelector:@selector(updateScreen) withObject:nil afterDelay:0.3];
+    //update_sort_setting
 
+}
 -(IBAction)actionOnMessage:(id)sender{
 
     MessagesViewController *obj=[[MessagesViewController alloc] init];
@@ -137,6 +178,7 @@ extern BOOL checkForSignUp;
                                    cancelButtonTitle:@"OK"
                                    otherButtonTitles:nil];
         [errorAlert show];
+        [spinner stopAnimating];    
         
     }else{
         NSError *error=nil;
@@ -145,7 +187,7 @@ extern BOOL checkForSignUp;
         id strForResponce = [NSJSONSerialization JSONObjectWithData: [str dataUsingEncoding:NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
         
         if (error==nil) {
-            
+//            [spinner stopAnimating];
             NSLog(@"value of string %@",strForResponce);
             if ([strForResponce count]>0) {
                 //[self performSelector:@selector(moveNextScreen)];
@@ -161,6 +203,7 @@ extern BOOL checkForSignUp;
                 NSLog(@"array for %@",arrayForServerData);
                 //[self showHUD];
                 [tableViewForCategoty reloadData];
+                
             }else{
                 UIAlertView *errorAlert = [[UIAlertView alloc]
                                            initWithTitle: @"Error"
@@ -183,7 +226,6 @@ extern BOOL checkForSignUp;
             [errorAlert show];
             
         }
-        
     }
 }
 
@@ -218,7 +260,9 @@ extern BOOL checkForSignUp;
         
         if (error==nil) {
             
-            
+            [spinner stopAnimating];
+            [spinner removeFromSuperview];
+
             NSLog(@"value of string %@",strForResponce);
             //[self showHUD];
             if ([strForResponce count]>0) {
@@ -277,7 +321,7 @@ extern BOOL checkForSignUp;
     //add Function
 }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
-    return 2;
+    return 3;
 }
 
 
@@ -285,7 +329,10 @@ extern BOOL checkForSignUp;
     if ([arrayForServerData count]==0) {
         return 0;
     }
-    if (section==0) {
+    if (section == 0) {
+        return 1;
+    }
+    if (section==1) {
         
     int coutForArray=[arrayForServerData count];
     if (coutForArray<=3) {
@@ -300,7 +347,7 @@ extern BOOL checkForSignUp;
       }
     }
     
-    if (section==1) {
+    if (section==2) {
         int coutForArray=[arrayForGroup count];
         if (coutForArray<=3) {
             return 1;
@@ -324,9 +371,43 @@ extern BOOL checkForSignUp;
     if (cell == nil) {
         cell = [[CellForWelcomeCategory alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
     }
-    
+    if(indexPath.section==0)
+    {
+        cell.textLabel.text =@"hello";
+        NSString *strForProfile =[[NSUserDefaults standardUserDefaults] valueForKey:@"Userprofile_picture"];
+        NSLog(@"value of profile image %@",strForProfile);
+        profileImage=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 0, 80, 140)];
+        [profileImage loadImage:strForProfile];
+        [profileImage setBackgroundColor:[UIColor whiteColor]];
+        [profileImage addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
+        [cell addSubview:profileImage];
+        //y coordinate modified by SUNDEEP 1 line below
+        coverImg=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(83, 0, 250, 140)];
+        [coverImg setBackgroundColor:[UIColor grayColor]];
+        if ([[[NSUserDefaults standardUserDefaults] valueForKey:@"UserCover_photo"] hasPrefix:@"http://"]) {
+            
+            NSLog(@"value of cover image %@",[[NSUserDefaults standardUserDefaults] valueForKey:@"UserCover_photo"]);
+            [coverImg loadImage:[[NSUserDefaults standardUserDefaults] valueForKey:@"UserCover_photo"]];
+        }
+        [coverImg addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
+        [cell addSubview:coverImg];
+       
+        btn_Feed = [[UIButton alloc]initWithFrame:CGRectMake(269, 117,48,25)];
+        [btn_Feed addTarget:self action:@selector(actionOnFeed:)forControlEvents:UIControlEventTouchDown];
+        UIImage *btn_Img = [UIImage imageNamed:@"feedbtn.png"];
+        [btn_Feed setImage:btn_Img forState:UIControlStateNormal];
+        [cell addSubview:btn_Feed];
+        btn_Feed = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        [btn_Feed addTarget:self
+                   action:@selector(actionOnFeed:)
+         forControlEvents:UIControlEventTouchDown];
+//        [btn_Feed setTitle:@"Feed" forState:UIControlStateNormal];
+//        btn_Feed.frame = CGRectMake(280, 0, 160.0, 40.0);
+//        [cell addSubview:btn_Feed];
+//        cell.imageView.image = profileImage;
+    }
     //***************************
-    if (indexPath.section==0) {
+    if (indexPath.section==1) {
     
     int countForRow=[arrayForServerData count]/3;
     if ([arrayForServerData count]%3 !=0) {
@@ -360,6 +441,7 @@ extern BOOL checkForSignUp;
                     [cell.image3 setImage:[UIImage imageNamed:@"add_category_txt.png"] forState:UIControlStateNormal];
                     [cell.image3 addTarget:self action:@selector(actionOnCategory:) forControlEvents:UIControlEventTouchUpInside];
                 }
+                
                 return cell;
             }
             
@@ -369,7 +451,7 @@ extern BOOL checkForSignUp;
                 
                 cell.image1.tag=(indexPath.row *3)+i;
                 cell.image1.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                cell.image1.layer.borderWidth=1.5;
+                cell.image1.layer.borderWidth=0;
                 [cell.image1 loadImage:str];
                 cell.imgViewForGra1.hidden=NO;
                 //[cell.image1 setImage:[UIImage imageNamed:@"Splash1.png"] forState:UIControlStateNormal];
@@ -390,7 +472,7 @@ extern BOOL checkForSignUp;
                 cell.image2.tag=(indexPath.row *3)+i;
                 [cell.image2 loadImage:str];
                 cell.image2.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                cell.image2.layer.borderWidth=1.5;
+                cell.image2.layer.borderWidth=0;
                 cell.imgViewForGra2.hidden=NO;
                 [cell.image2 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
 //                
@@ -410,7 +492,7 @@ extern BOOL checkForSignUp;
                 cell.image3.tag=(indexPath.row *3)+i;
                 [cell.image3 loadImage:str];
                 cell.image3.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                cell.image3.layer.borderWidth=1.5;
+                cell.image3.layer.borderWidth=0;
                 cell.imgViewForGra3.hidden=NO;
                 [cell.image3 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                 
@@ -429,7 +511,7 @@ extern BOOL checkForSignUp;
     }
     //***************************
     
-    if (indexPath.section==1) {
+    if (indexPath.section==2) {
         
         int countForRow=[arrayForGroup count]/3;
         if ([arrayForGroup count]%3 !=0) {
@@ -472,7 +554,7 @@ extern BOOL checkForSignUp;
                     
                     cell.image1.tag=(indexPath.row *3)+i;
                     cell.image1.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image1.layer.borderWidth=1.5;
+                    cell.image1.layer.borderWidth=0;
                     [cell.image1 loadImage:str];
                     cell.imgViewForGra1.hidden=NO;
                     //[cell.image1 setImage:[UIImage imageNamed:@"Splash1.png"] forState:UIControlStateNormal];
@@ -486,7 +568,7 @@ extern BOOL checkForSignUp;
                     cell.image2.tag=(indexPath.row *3)+i;
                     [cell.image2 loadImage:str];
                     cell.image2.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image2.layer.borderWidth=1.5;
+                    cell.image2.layer.borderWidth=0;
                     cell.imgViewForGra2.hidden=NO;
                     [cell.image2 addTarget:self action:@selector(actionOnGroupEdit:) forControlEvents:UIControlEventTouchUpInside];
                     
@@ -500,7 +582,7 @@ extern BOOL checkForSignUp;
                     cell.image3.tag=(indexPath.row *3)+i;
                     [cell.image3 loadImage:str];
                     cell.image3.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image3.layer.borderWidth=1.5;
+                    cell.image3.layer.borderWidth=0;
                     cell.imgViewForGra3.hidden=NO;
                     [cell.image3 addTarget:self action:@selector(actionOnGroupEdit:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.lbl3 setText:[[arrayForGroup objectAtIndex:(indexPath.row *3)+i] valueForKey:@"group_name"]];
@@ -511,18 +593,25 @@ extern BOOL checkForSignUp;
     }
     
     return cell;
+
+    
 }
 
 
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
-    if (section==1) {
+    if (section==2) {
         return 30;
     }
+//    if (section==1) {
+//        return 2;
+//    }
+
     return  0;
 }
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    if (section==1) {
+    NSLog(@"section ki values = %d", section);
+        if (section==2) {
         
         UIView *viewForHeader=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 45)];
         UIImageView *imgViewForBg=[[UIImageView alloc] initWithFrame:CGRectMake(0,0, 320, 30)];
@@ -539,6 +628,31 @@ extern BOOL checkForSignUp;
         
         return viewForHeader;
     }
+//    if (section==1) {
+//        
+//        UIView *viewForHeader=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 45)];
+//        UIImageView *imgViewForBg=[[UIImageView alloc] initWithFrame:CGRectMake(0,0, 320, 30)];
+//        [imgViewForBg setImage:[UIImage imageNamed:@"nav_bottom_bar.png"]];
+//        [viewForHeader addSubview:imgViewForBg];
+//        //search_bar btn_Feed = [[UIButton alloc]initWithFrame:CGRectMake(267, 0,48,25)];
+//      
+//
+//        UILabel *lblForAddress=[[UILabel alloc] initWithFrame:CGRectMake(5, 0, 200, 30)];
+//        [lblForAddress setText:@"Add Category"];
+//        [lblForAddress setFont:[UIFont boldSystemFontOfSize:14]];
+//        [lblForAddress setTextAlignment:UITextAlignmentLeft];
+//        [lblForAddress setBackgroundColor:[UIColor clearColor]];
+//        [lblForAddress setTextColor:[UIColor darkGrayColor]];
+//        [viewForHeader addSubview:lblForAddress];
+//        
+//        btn_Feed = [[UIButton alloc]initWithFrame:CGRectMake(267,2,48,25)];
+//        [btn_Feed addTarget:self action:@selector(actionOnFeed:)forControlEvents:UIControlEventTouchDown];
+//        UIImage *btn_Img = [UIImage imageNamed:@"feedbtn.png"];
+//        [btn_Feed setImage:btn_Img forState:UIControlStateNormal];
+//        [viewForHeader addSubview:btn_Feed];
+//        return viewForHeader;
+//    }
+
     return nil;
     
 }
@@ -595,7 +709,15 @@ extern BOOL checkForSignUp;
 //        }
 //    }
     
+//    "master_category_id" = 518737f1b554cfd51d000002;
+//    "master_category_image" = "http://s3.amazonaws.com/welike1/master_category/518737f1b554cfd51d000002/category_image/:medium.png?1367816177";
+//    "master_category_name" = Books;
+//    status = YES;
+//    "user_category_id" = 5226fdd101ce2ec49c000002;
     UIButton *btn=(UIButton*)sender;
+    dicForCategorySelected=[NSDictionary dictionaryWithObjectsAndKeys:[[arrayForServerData objectAtIndex:btn.tag] valueForKey:@"master_category_id"],@"master_category_id",[[arrayForServerData objectAtIndex:btn.tag] valueForKey:@"user_category_image"],@"master_category_image",[[arrayForServerData objectAtIndex:btn.tag] valueForKey:@"user_categy_name"],@"master_category_name",[[arrayForServerData objectAtIndex:btn.tag] valueForKey:@"user_id"],@"user_category_id", nil];
+    
+    
     
     EnityUserController *obj=[[EnityUserController alloc] init];
     //NSLog(@"value of %@",[[arrayForServerData objectAtIndex:btn.tag] valueForKey:@"user_category_id"]);
@@ -609,7 +731,13 @@ extern BOOL checkForSignUp;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return 105;
+    if (indexPath.section == 0) {
+        return 140;
+    }
+    else{
+    return 105;    
+    }
+    
 }
 
 -(void)callArrangeTop{
@@ -617,6 +745,7 @@ extern BOOL checkForSignUp;
     id sender=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserName"];
     NSLog(@"sender %@",sender);
     if ([sender isKindOfClass:[NSString class]]) {
+        sender=[sender capitalizedString];
         lblForTitle.text=sender;
     }
     //coverImg=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 44, 320, 130)];
@@ -629,26 +758,17 @@ extern BOOL checkForSignUp;
     [coverImg addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
     //[self.view addSubview:coverImg];
     
-    NSString *strForProfile =[[NSUserDefaults standardUserDefaults] valueForKey:@"Userprofile_picture"];
-    NSLog(@"value of profile image %@",strForProfile);
-    profileImage=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 44, 80, 120)];
-    [profileImage loadImage:strForProfile];
-    [profileImage setBackgroundColor:[UIColor whiteColor]];
-    [profileImage addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:profileImage];    
+//    NSString *strForProfile =[[NSUserDefaults standardUserDefaults] valueForKey:@"Userprofile_picture"];
+//    NSLog(@"value of profile image %@",strForProfile);
+//    profileImage=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 44, 80, 120)];
+//    [profileImage loadImage:strForProfile];
+//    [profileImage setBackgroundColor:[UIColor whiteColor]];
+//    [profileImage addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
+//    [self.view addSubview:profileImage];
     
 }
 
--(void)viewWillAppear:(BOOL)animated{
-    AppDelegate *delegate=(AppDelegate*)[UIApplication sharedApplication].delegate;
-    delegate.navControllerApp.navigationBar.hidden=YES;
-    self.navigationController.navigationBar.hidden=YES;
-    //[self showHUD];
-    [self performSelector:@selector(callupdate_sort_setting) withObject:nil afterDelay:0.1];
-    [self performSelector:@selector(callArrangeTop) withObject:nil afterDelay:0.2];
-    [self performSelector:@selector(updateScreen) withObject:nil afterDelay:0.3];
-    //update_sort_setting
-}
+
 -(void)callupdate_sort_setting{
     
     
@@ -678,6 +798,7 @@ extern BOOL checkForSignUp;
         id strForResponce = [NSJSONSerialization JSONObjectWithData: [str dataUsingEncoding:NSUTF8StringEncoding] options: NSJSONReadingMutableContainers error: &error];
         
         NSLog(@"**********%@",strForResponce);
+        [tableViewForCategoty reloadData];
 //        if (error==nil) {
 //            
 //        

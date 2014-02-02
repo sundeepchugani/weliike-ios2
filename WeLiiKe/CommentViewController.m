@@ -68,7 +68,7 @@ extern int checkForFB;
     [customRank setValue:0];
     [customRank setUserInteractionEnabled:YES];
     [self.view addSubview:customRank];
-    
+    [self.txtViewForComment setDelegate:self];
     txtViewForComment.layer.cornerRadius=5.0;
     txtViewForComment.layer.masksToBounds=YES;
     txtViewForComment.layer.borderWidth=1.5;
@@ -94,14 +94,19 @@ extern int checkForFB;
     
 }
 -(void)callWebService{
-    
+  
     WeLiikeWebService *service=[[WeLiikeWebService alloc] initWithDelegate:self callback:@selector(EntityCommentHandler:)];
     //int countObj=[arrayForCateSelected count]-countSelectedCategory;
     //labelForName.text=[[arrayForCateSelected objectAtIndex:countObj] valueForKey:@"Name"];
+//    NSString *s = [txtViewForComment text];
+//    const char* utf8Str = [s UTF8String];
+//    NSString *comment = [NSString stringWithUTF8String:utf8Str];
+//    NSLog(@"string = = = = = = = = = = %@", comment);
+    NSString * s  = [[txtViewForComment text] stringByReplacingOccurrencesOfString:@";" withString:@""];
     NSString *strID=[[NSUserDefaults standardUserDefaults] valueForKey:@"UserID"];
     if ([strForEntity isEqualToString:@"entity"]) {
         
-        [service EntityComment:[NSString stringWithFormat:@"%d",(int)customRank.value] comment_text:txtViewForComment.text user_id:[dicForDetail valueForKey:@"user_id"] user_entity_id:[dicForDetail valueForKey:@"user_entity_id"] selfUserId:strID];
+        [service EntityComment:[NSString stringWithFormat:@"%d",(int)customRank.value] comment_text:s user_id:[dicForDetail valueForKey:@"user_id"] user_entity_id:[dicForDetail valueForKey:@"user_entity_id"] selfUserId:strID];
        
     }else{
          [service PostComment:[dicForDetail valueForKey:@"post_id"] rating_count:[NSString stringWithFormat:@"%d",(int)customRank.value] comment_text:txtViewForComment.text user_id:[dicForDetail valueForKey:@"user_id"] selfUserId:strID];
@@ -115,7 +120,7 @@ extern int checkForFB;
 }
 
 -(void)EntityCommentHandler:(id)sender{
-    [self killHUD];
+      [self killHUD];
     
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -163,13 +168,15 @@ extern int checkForFB;
         }
         
     }
+      [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(IBAction)actionOnDone:(id)sender{
-   
+    [self.view endEditing:NO];
+
     if ([txtViewForComment.text length]>0) {
         [self showHUD];
-        
+        NSLog(@"TXt entered is = %@", txtViewForComment.text);
         NSMutableDictionary *params;
         if ([strForEntity isEqualToString:@"entity"]) {
             params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
@@ -190,6 +197,11 @@ extern int checkForFB;
         
         [self performSelector:@selector(callWebService) withObject:nil afterDelay:0.2];
     }
+     else if([txtViewForComment.text length]==0){
+         UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:@"Message" message:@"No comment has been added. Press back to return to the detail page" delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+         [alertView show];
+
+}
 }
 
 -(IBAction)actionOnFacebook:(id)sender{
@@ -401,5 +413,135 @@ extern int checkForFB;
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
+
+#pragma mark Keyboard events for "# and @ button"
+-(void)keyboardWillShow:(NSNotification*)noti{
+    
+    if (checkKeyBoard==YES) {
+        
+        UIView *viewForReturn=[[UIView alloc] initWithFrame:CGRectMake(240+2-3, 174-5, 78-10+10+5, 38+10)];
+        [viewForReturn setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"KeyPadBackgroundColor.png"]]];
+        viewForReturn.userInteractionEnabled=YES;
+        
+        //Add button to keyboard
+        UIButton *atTheRateBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        atTheRateBtn.frame = CGRectMake(5, 2+2, 30, 36+6);
+        atTheRateBtn.adjustsImageWhenHighlighted = NO;
+        [atTheRateBtn.layer setCornerRadius:3];
+        
+        [atTheRateBtn setBackgroundImage:[UIImage imageNamed:@"btn_at_the_rate.png"] forState:UIControlStateNormal];
+        atTheRateBtn.tag=1;
+        [atTheRateBtn addTarget:self action:@selector(actionOnKeyBoard:) forControlEvents:UIControlEventTouchUpInside];
+        
+        
+        UIButton *hashButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        hashButton.frame = CGRectMake(40, 2+2, 30, 36+5+1);
+        hashButton.adjustsImageWhenHighlighted = NO;
+        hashButton.tag=2;
+        [hashButton.layer setCornerRadius:3];
+        [hashButton setBackgroundImage:[UIImage imageNamed:@"btn_hash.png"] forState:UIControlStateNormal];
+        [hashButton addTarget:self action:@selector(actionOnKeyBoard:) forControlEvents:UIControlEventTouchUpInside];
+        UIWindow* tempWindow = [[[UIApplication sharedApplication] windows] objectAtIndex:1];
+        UIView* keyboard;
+        for(int i=0; i<[tempWindow.subviews count]; i++) {
+            keyboard = [tempWindow.subviews objectAtIndex:i];
+            
+            if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 3.2) {
+                if([[keyboard description] hasPrefix:@"<UIPeripheralHost"] == YES)  {
+                    
+                    [keyboard addSubview:viewForReturn];
+                    [viewForReturn addSubview:atTheRateBtn];
+                    [viewForReturn addSubview:hashButton];
+                }
+            } else {
+                if([[keyboard description] hasPrefix:@"<UIKeyboard"] == YES) {
+                    
+                    [keyboard addSubview:viewForReturn];
+                    [viewForReturn addSubview:atTheRateBtn];
+                    [viewForReturn addSubview:hashButton];
+                }
+            }
+        }
+    }
+}
+
+-(void)actionOnKeyBoard:(UIButton *)btn{
+
+    if (btn.tag==1) {
+        NSString *strForInput=[NSString stringWithFormat:@"%@@",txtViewForComment.text];
+        txtViewForComment.text=strForInput;
+       
+    }else if (btn.tag==2){
+        NSString *strForInput=[NSString stringWithFormat:@"%@#",txtViewForComment.text];
+                txtViewForComment.text=strForInput;
+
+    }
+    
+}
+-(void)keyboardWillHide:(NSNotification*)noti{
+    
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardShow" object:nil];
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
+    
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
+    [txtViewForComment resignFirstResponder];
+    return YES;
+}
+
+- (void)textFieldDidBeginEditing:(UITextField *)textField{
+    
+    checkKeyBoard=NO;
+    [txtViewForComment resignFirstResponder];
+    [txtViewForComment becomeFirstResponder];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
+    
+    
+}
+- (void)textFieldDidEndEditing:(UITextField *)textField{
+    
+    
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:@"KeyBoardHide" object:nil];
+}
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
+    if ([text isEqual:@"\n"]) {
+        if ([txtViewForComment.text length]==0) {
+
+        }
+        [txtViewForComment resignFirstResponder];
+        return NO;
+    }else if ([txtViewForComment.text length]==1 && [text isEqualToString:@""]){
+//        lblForWrite.hidden=NO;
+    }else{
+//        lblForWrite.hidden=YES;
+    }
+    return YES;
+}
+- (void)textViewDidBeginEditing:(UITextView *)textView{
+    
+//    lblForWrite.hidden=YES;
+    checkKeyBoard=YES;
+//    [txtField resignFirstResponder];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:@"KeyBoardHide" object:nil];
+//    [scrollViewForPost setContentSize:CGSizeMake(320, 630)];
+//    [scrollViewForPost setContentOffset:CGPointMake(0, 220) animated:YES];
+    
+    
+}
+- (void)textViewDidEndEditing:(UITextView *)textView{
+    //lblForWrite.hidden=NO;
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"KeyBoardHide" object:nil];
+//    [scrollViewForPost setContentSize:CGSizeMake(320, 460)];
+//    [scrollViewForPost setContentOffset:CGPointMake(0, 0) animated:YES];
+    
+}
+
+
 
 @end

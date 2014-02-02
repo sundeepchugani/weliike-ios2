@@ -20,7 +20,7 @@
 #import "ARCMacros.h"
 #import "CaptionPopViewController.h"
 
-@interface MediadetailViewController : UIViewController<MKMapViewDelegate,UIScrollViewDelegate,CustomStarRankDelegate>{
+@interface MediadetailViewController : UIViewController<MKMapViewDelegate,UIScrollViewDelegate,CustomStarRankDelegate,RTLabelDelegate>{
 
     UIScrollView *scrollViewForMain;    
     NSMutableArray *arrayForData;
@@ -29,6 +29,7 @@
     MKMapView *MapViewForLocation;
     HudView *aHUD;
     NSString *strForEntity;
+
    
     //*******************
     UITableView *tableViewForDetail;
@@ -40,9 +41,11 @@
     UIAlertView *alertForCaption;
     FPPopoverController *popover;
     UILabel *lblForTitle;
-}
+   }
+- (IBAction)actionOnMap:(id)sender;
 @property(nonatomic,retain)NSString *strUserID;
 @property(nonatomic,retain)IBOutlet UITableView *tableViewForDetail;
+@property(nonatomic,retain)IBOutlet UIButton *btn_MapButton;
 @property(nonatomic,retain)NSString *strForEntity;
 @property(nonatomic,retain)IBOutlet UIScrollView *scrollViewForMain;
 @property(nonatomic,retain)IBOutlet UILabel *lblForTitle;

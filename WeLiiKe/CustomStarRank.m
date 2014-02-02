@@ -80,6 +80,10 @@
     }
     else
     {
+        if (value<1 && (getValue+0.5)>=1) {
+            value=0;
+        }
+        
         if (value<0)
             value = 0;
         else if (value>getNumberOfStar)
@@ -88,7 +92,7 @@
             value += 0.25;
         
         value = (float)(((int)(value*2))/2.0);
-        
+    
         if (getValue!=value)
         {
             if (self.delegate != NULL && [self.delegate respondsToSelector:@selector(CustomStarRank:DidChangedValue:)])
@@ -97,7 +101,7 @@
         
         getValue = value;
         //NSLog(@"Get:%f",getValue);
-        
+           
         NSArray *stars = [[NSArray alloc] initWithArray:self.subviews];
         
         int Changes = getValue*2; 
@@ -121,6 +125,7 @@
                 [[stars objectAtIndex:i] setImage:[UIImage imageNamed:strStarActImage]];
             }else{
                 [[stars objectAtIndex:i] setImage:[UIImage imageNamed:@"star_active.png"]];
+
             }
             
             [[stars objectAtIndex:i] setFrame:CGRectMake(self.bounds.size.width*(i/getNumberOfStar), self.bounds.origin.y,
@@ -150,7 +155,8 @@
 }
 
 - (void)sliderTapped:(UIGestureRecognizer *)recognizer
-{    
+{
+    
     CGPoint pt = [recognizer locationInView: self];
     CGFloat percentage = pt.x / self.frame.size.width;
     CGFloat delta = percentage * getNumberOfStar;

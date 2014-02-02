@@ -17,7 +17,9 @@
 
 @interface OtherUserProfile : UIViewController<UIGestureRecognizerDelegate>
 {
+    
     AsyncImageViewSmall *profileImage;
+    IBOutlet UIButton *btn_Feed;
     IBOutlet AsyncImageViewSmall *coverImg;
     UITableView *tableViewForCategoty;
     NSMutableArray *arrayForServerData,*arrayForGroup;

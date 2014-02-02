@@ -81,14 +81,14 @@
     //add Function
 }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
-    if (checkForFriend==NO) {
-        return 0;
-    }
-    int coutForArray=[arrayForGroup count];
-    if (coutForArray==0) {
-        return 1;
-    }
-    return 2;
+//    if (checkForFriend==NO) {
+//        return 0;
+//    }
+//    int coutForArray=[arrayForGroup count];
+//    if (coutForArray==0) {
+//        return 1;
+//    }
+    return 3;
 }
 
 
@@ -96,7 +96,11 @@
     if ([arrayForServerData count]==0) {
         return 0;
     }
+    
     if (section==0) {
+        return 1;
+          }
+    if (section==1) {
         
         int coutForArray=[arrayForServerData count];
         if (coutForArray<=3) {
@@ -111,7 +115,7 @@
         }
     }
     
-    if (section==1) {
+    if (section==2) {
         int coutForArray=[arrayForGroup count];
         if (coutForArray<=3) {
             return 1;
@@ -138,6 +142,35 @@
     
     //***************************
     if (indexPath.section==0) {
+        cell.textLabel.text = @"HELLO";
+        NSDictionary *dicForUser=[[dicForServerData valueForKey:@"users"] objectAtIndex:0];
+        coverImg=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(83, 0, 250, 140)];
+        [coverImg setBackgroundColor:[UIColor grayColor]];
+
+               if ([[dicForUser valueForKey:@"cover_photo"] hasPrefix:@"http://"]) {
+            
+            NSLog(@"value of cover image %@",[dicForUser valueForKey:@"cover_photo"]);
+            [coverImg loadImage:[dicForUser valueForKey:@"cover_photo"]];
+        }
+        
+        [coverImg addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
+        [cell addSubview:coverImg];
+        
+        NSString *strForProfile =[dicForUser valueForKey:@"profile_picture"];
+        NSLog(@"value of profile image %@",strForProfile);
+        profileImage=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 0, 80, 140)];
+        [profileImage loadImage:strForProfile];
+        [profileImage addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
+        [profileImage setBackgroundColor:[UIColor whiteColor]];
+        [cell addSubview:profileImage];
+        btn_Feed = [[UIButton alloc]initWithFrame:CGRectMake(269, 117,48,25)];
+        [btn_Feed addTarget:self action:@selector(actionOnFeed:)forControlEvents:UIControlEventTouchDown];
+        UIImage *btn_Img = [UIImage imageNamed:@"feedbtn.png"];
+        [btn_Feed setImage:btn_Img forState:UIControlStateNormal];
+        [cell addSubview:btn_Feed];
+    }
+
+    if (indexPath.section==1) {
         
         int countForRow=[arrayForServerData count]/3;
         if ([arrayForServerData count]%3 !=0) {
@@ -161,7 +194,7 @@
                     
                     cell.image1.tag=(indexPath.row *3)+i;
                     cell.image1.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image1.layer.borderWidth=1.5;
+                    cell.image1.layer.borderWidth=0;
                     [cell.image1 loadImage:str];
                     cell.imgViewForGra1.hidden=NO;
                     [cell.image1 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
@@ -174,7 +207,7 @@
                     cell.image2.tag=(indexPath.row *3)+i;
                     [cell.image2 loadImage:str];
                     cell.image2.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image2.layer.borderWidth=1.5;
+                    cell.image2.layer.borderWidth=0;
                     cell.imgViewForGra2.hidden=NO;
                     [cell.image2 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.lbl2 setText:[[arrayForServerData objectAtIndex:(indexPath.row *3)+i] valueForKey:@"category_name"]];
@@ -187,7 +220,7 @@
                     cell.image3.tag=(indexPath.row *3)+i;
                     [cell.image3 loadImage:str];
                     cell.image3.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image3.layer.borderWidth=1.5;
+                    cell.image3.layer.borderWidth=0;
                     cell.imgViewForGra3.hidden=NO;
                     [cell.image3 addTarget:self action:@selector(checkButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.lbl3 setText:[[arrayForServerData objectAtIndex:(indexPath.row *3)+i] valueForKey:@"category_name"]];
@@ -198,7 +231,7 @@
     }
     //***************************
     
-    if (indexPath.section==1) {
+    if (indexPath.section==2) {
         
         int countForRow=[arrayForGroup count]/3;
         if ([arrayForGroup count]%3 !=0) {
@@ -221,7 +254,7 @@
                     
                     cell.image1.tag=(indexPath.row *3)+i;
                     cell.image1.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image1.layer.borderWidth=1.5;
+                    cell.image1.layer.borderWidth=0;
                     [cell.image1 loadImage:str];
                     cell.imgViewForGra1.hidden=NO;
                     [cell.image1 addTarget:self action:@selector(actionOnGroupEdit:) forControlEvents:UIControlEventTouchUpInside];
@@ -234,7 +267,7 @@
                     cell.image2.tag=(indexPath.row *3)+i;
                     [cell.image2 loadImage:str];
                     cell.image2.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image2.layer.borderWidth=1.5;
+                    cell.image2.layer.borderWidth=0;
                     cell.imgViewForGra2.hidden=NO;
                     [cell.image2 addTarget:self action:@selector(actionOnGroupEdit:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.lbl2 setText:[[arrayForGroup objectAtIndex:(indexPath.row *3)+i] valueForKey:@"group_name"]];
@@ -247,7 +280,7 @@
                     cell.image3.tag=(indexPath.row *3)+i;
                     [cell.image3 loadImage:str];
                     cell.image3.layer.borderColor=[UIColor lightGrayColor].CGColor;
-                    cell.image3.layer.borderWidth=1.5;
+                    cell.image3.layer.borderWidth=0;
                     cell.imgViewForGra3.hidden=NO;
                     [cell.image3 addTarget:self action:@selector(actionOnGroupEdit:) forControlEvents:UIControlEventTouchUpInside];
                     [cell.lbl3 setText:[[arrayForGroup objectAtIndex:(indexPath.row *3)+i] valueForKey:@"group_name"]];
@@ -263,13 +296,38 @@
 
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
-    if (section==1) {
+    if (section==2) {
         return 30;
     }
     return  0;
 }
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    if (section==1) {
+//    if (section==1) {
+//        
+//        UIView *viewForHeader=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 45)];
+//        UIImageView *imgViewForBg=[[UIImageView alloc] initWithFrame:CGRectMake(0,0, 320, 30)];
+//        [imgViewForBg setImage:[UIImage imageNamed:@"nav_bottom_bar.png"]];
+//        [viewForHeader addSubview:imgViewForBg];
+//        //search_bar btn_Feed = [[UIButton alloc]initWithFrame:CGRectMake(267, 0,48,25)];
+//        
+//        
+//        UILabel *lblForAddress=[[UILabel alloc] initWithFrame:CGRectMake(5, 0, 200, 30)];
+//        [lblForAddress setText:@"Add Category"];
+//        [lblForAddress setFont:[UIFont boldSystemFontOfSize:14]];
+//        [lblForAddress setTextAlignment:UITextAlignmentLeft];
+//        [lblForAddress setBackgroundColor:[UIColor clearColor]];
+//        [lblForAddress setTextColor:[UIColor darkGrayColor]];
+//        [viewForHeader addSubview:lblForAddress];
+//        
+//        btn_Feed = [[UIButton alloc]initWithFrame:CGRectMake(267,2,48,25)];
+//        [btn_Feed addTarget:self action:@selector(actionOnFeed:)forControlEvents:UIControlEventTouchDown];
+//        UIImage *btn_Img = [UIImage imageNamed:@"feedbtn.png"];
+//        [btn_Feed setImage:btn_Img forState:UIControlStateNormal];
+//        [viewForHeader addSubview:btn_Feed];
+//        return viewForHeader;
+//    }
+//
+    if (section==2) {
         
         UIView *viewForHeader=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 45)];
         UIImageView *imgViewForBg=[[UIImageView alloc] initWithFrame:CGRectMake(0,0, 320, 30)];
@@ -308,7 +366,12 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return 105;
+    if (indexPath.section == 0) {
+        return 140;
+    }
+    else{
+        return 105;
+    }
 }
 
 -(void)callArrangeTop{
@@ -317,30 +380,31 @@
     id sender=[dicForUser valueForKey:@"user_name"];
     NSLog(@"sender %@",sender);
     if ([sender isKindOfClass:[NSString class]]) {
+        sender=[sender capitalizedString];
         lblForTitle.text=sender;
     }
-    //coverImg=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 44, 320, 90)];
-    [coverImg setBackgroundColor:[UIColor grayColor]];
-    if ([[dicForUser valueForKey:@"cover_photo"] hasPrefix:@"http://"]) {
-        
-        NSLog(@"value of cover image %@",[dicForUser valueForKey:@"cover_photo"]);
-        [coverImg loadImage:[dicForUser valueForKey:@"cover_photo"]];
-    }
-   
-    [coverImg addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
-    //[self.view addSubview:coverImg];
-    
-    NSString *strForProfile =[dicForUser valueForKey:@"profile_picture"];
-    NSLog(@"value of profile image %@",strForProfile);
-    profileImage=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 44, 80, 120)];
-    [profileImage loadImage:strForProfile];
-    [profileImage addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
-    [profileImage setBackgroundColor:[UIColor whiteColor]];
-    [self.view addSubview:profileImage];
+//    //coverImg=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 44, 320, 90)];
+//    [coverImg setBackgroundColor:[UIColor grayColor]];
+//    if ([[dicForUser valueForKey:@"cover_photo"] hasPrefix:@"http://"]) {
+//        
+//        NSLog(@"value of cover image %@",[dicForUser valueForKey:@"cover_photo"]);
+//        [coverImg loadImage:[dicForUser valueForKey:@"cover_photo"]];
+//    }
+//   
+//    [coverImg addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
+//    //[self.view addSubview:coverImg];
+//    
+//    NSString *strForProfile =[dicForUser valueForKey:@"profile_picture"];
+//    NSLog(@"value of profile image %@",strForProfile);
+//    profileImage=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 44, 80, 120)];
+//    [profileImage loadImage:strForProfile];
+//    [profileImage addTarget:self action:@selector(actionOnZoom:) forControlEvents:UIControlEventTouchUpInside];
+//    [profileImage setBackgroundColor:[UIColor whiteColor]];
+//    [self.view addSubview:profileImage];
     
     if (checkForFriend==NO) {
         
-        UIButton *btnForAddFriend=[[UIButton alloc] initWithFrame:CGRectMake(240, 95, 70, 35)];
+        UIButton *btnForAddFriend=[[UIButton alloc] initWithFrame:CGRectMake(240, 2, 70, 35)];
         //[btnForUserName setTitle:[[arrayForData objectAtIndex:i] valueForKey:@"UserName"] forState:UIControlStateNormal];
         [btnForAddFriend.titleLabel setFont:[UIFont boldSystemFontOfSize:14]];
         //[btnForAddFriend setTitleColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0] forState:UIControlStateNormal];
@@ -440,6 +504,9 @@
 }
 -(void)viewDidAppear:(BOOL)animated{
     AppDelegate *delegate=(AppDelegate*)[UIApplication sharedApplication].delegate;
+    [self.tabBarController setTabBarHidden:NO
+                                  animated:YES];
+    delegate.btnPost.hidden = NO;
     delegate.navControllerApp.navigationBar.hidden=YES;
     self.navigationController.navigationBar.hidden=YES;
     [self showHUD];
@@ -556,6 +623,7 @@
 
 - (void)viewDidUnload
 {
+
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;

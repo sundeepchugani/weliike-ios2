@@ -19,8 +19,10 @@
 #import "FBConnect.h"
 
 
+
 @interface PostViewController : UIViewController<UITextViewDelegate,UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate,FBRequestDelegate,FBDialogDelegate,UIScrollViewDelegate>{
 
+    
     UIImageView *imgView;
     UITextView *txtView;
     UITextField *txtField;
@@ -37,10 +39,22 @@
     UIScrollView *scrollViewTakePhoto;
     NSString *strForLatFourSqaure,*strForLongFourSqaure;
     BOOL checkKeyBoard;
+    BOOL B_Share;
+    BOOL keyBordUp;
+    BOOL checkStatus;
+    BOOL B_Defualf;
+   
     UIScrollView *scrollViewForPost;
     UIActivityIndicatorView *activityIndicatorView;
+    
 
 }
+
+- (IBAction)actionOnLock:(id)sender;
+
+@property (nonatomic,strong)  IBOutlet UIButton *btn_Share;
+@property (nonatomic,strong) IBOutlet UIView *v_BottomView;
+@property (nonatomic,strong) IBOutlet UIImageView *ImgView_StarRating;
 @property(nonatomic,retain)IBOutlet UIScrollView *scrollViewForPost;
 @property(nonatomic,retain)IBOutlet UILabel *lblForWrite;
 @property(nonatomic,retain)NSString *strForAddress,*strForSubcategoryName,*strForCity;
@@ -51,10 +65,13 @@
 @property(nonatomic,retain)IBOutlet UIImageView *imgView;
 @property(nonatomic,retain)IBOutlet UITextView *txtView;
 @property(nonatomic,retain)IBOutlet UIView *parentView;
+@property(nonatomic,strong)IBOutlet UIButton *btn_Back,*btn_Done;
+
 
 @property (strong, nonatomic) FBRequestConnection *requestConnection;
 
 -(void)selectCatogiry;
+-(void)resignTextView;
 -(IBAction)actionOnSelectCategory:(id)sender;
 -(IBAction)actionOnBack:(id)sender;
 -(IBAction)actionOnDone:(id)sender;

@@ -16,7 +16,7 @@
 
 extern int checkForFB;
 @implementation FriendsViewController
-@synthesize lblForUserName,searchBarExplore,tableForSearch;
+@synthesize lblForUserName,searchBarExplore,tableForSearch,btn_Edit;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -35,27 +35,27 @@ extern int checkForFB;
     // Release any cached data, images, etc that aren't in use.
 }
 
-- (void) killHUD
-{
-	if(aHUD != nil ){
-		[aHUD.loadingView removeFromSuperview];
-        [self.view setUserInteractionEnabled:YES];
-        aHUD = nil;
-		[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-	}
-}
+//- (void) killHUD
+//{
+//	if(aHUD != nil ){
+//		[aHUD.loadingView removeFromSuperview];
+//        [self.view setUserInteractionEnabled:YES];
+//        aHUD = nil;
+//		[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+//	}
+//}
 
 //Initialize and display the progress view
-- (void) showHUD
-{
-	if(aHUD == nil)
-	{
-		aHUD = [[HudView alloc]init];
-        [aHUD loadingViewInView:self.view text:@"Please Wait..."];
-		[aHUD setUserInteractionEnabledForSuperview:self.view.superview];
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    }
-}
+//- (void) showHUD
+//{
+//	if(aHUD == nil)
+//	{
+//		aHUD = [[HudView alloc]init];
+//        [aHUD loadingViewInView:self.view text:@"Please Wait..."];
+//		[aHUD setUserInteractionEnabledForSuperview:self.view.superview];
+//        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+//    }
+//}
 
 
 #pragma mark - View lifecycle
@@ -64,9 +64,11 @@ extern int checkForFB;
 {
     [super viewDidLoad];
     arrayAllServerData=[[NSMutableArray alloc] init];
-    
-    
-    // Do any additional setup after loading the view from its nib.
+    activityIndicatorView = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    activityIndicatorView.frame = CGRectMake(0, 0, 90, 90);
+    activityIndicatorView.center = self.view.center;
+    [self.view addSubview:activityIndicatorView];
+       // Do any additional setup after loading the view from its nib.
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleChange:)
                                                  name:@"FBGetPeople"
@@ -81,7 +83,8 @@ extern int checkForFB;
     if (![[delegate facebook] isSessionValid]) {
         //[self showLoggedOut];
     } else {
-        [self showHUD];
+//        [self showHUD];
+//        [activityIndicatorView startAnimating];
         [self performSelector:@selector(getAllfriends) withObject:nil afterDelay:0.2];
     }
 
@@ -149,7 +152,8 @@ extern int checkForFB;
         [self performSelector:@selector(getfriends)];
         return;
     }
-    [self killHUD];
+//    [self killHUD];
+    [activityIndicatorView stopAnimating];
     NSLog(@"value of result %@",result);
     if ([result isKindOfClass:[NSDictionary class]]) {
         if ([result valueForKey:@"data"]!=nil) {
@@ -157,8 +161,19 @@ extern int checkForFB;
             FriendEmailFbViewController *obj=[[FriendEmailFbViewController alloc] init];
             obj.strCheckFBandEmail=@"Facebook";
             obj.dicForFriendFB=(NSDictionary*)result;
-            [self.navigationController pushViewController:obj animated:YES];
-            //[self performSelector:@selector(callService:) withObject:(NSDictionary*)result];
+//            [self.navigationController pushViewController:obj animated:YES];
+
+//            NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+//                                           @"It's your turn to visit the Weliike for iOS app.",  @"message",
+//                                           nil];
+//            
+//            AppDelegate *delegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+//            [[delegate facebook] dialog:@"apprequests"
+//                              andParams:params
+//                            andDelegate:self];
+//            FriendEmailFbViewController *obj=[[FriendEmailFbViewController alloc] init];
+            //            obj.strCheckFBandEmail=@"Facebook";//[self performSelector:@selector(callService:) withObject:(NSDictionary*)result];
+             [self.navigationController pushViewController:obj animated:YES];
         }
     }
     // This callback can be a result of getting the user's basic
@@ -176,10 +191,14 @@ extern int checkForFB;
 -(void)viewDidAppear:(BOOL)animated{
 
     [super viewDidAppear:animated];
-    [self showHUD];
+//    [self showHUD];
+   
     [self performSelector:@selector(callArrangeTop)];
-    [self performSelector:@selector(callServiceGroup) withObject:nil afterDelay:0.2];
-    
+    if(searchBarExplore.text.length==0)
+    {
+         [activityIndicatorView startAnimating];
+        [self performSelector:@selector(callServiceGroup) withObject:nil afterDelay:0.2];
+    }
 }
 
 -(void)actionOnZoom:(UIButton*)sender{
@@ -206,8 +225,8 @@ extern int checkForFB;
 }
 
 -(void)peoplesHandler:(id)sender{
-    [self killHUD];
-    
+//    [self killHUD];
+    [activityIndicatorView stopAnimating];
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
                                    initWithTitle: @"Error"
@@ -226,7 +245,8 @@ extern int checkForFB;
         if (error==nil) {
             
             NSLog(@"value of string %@",strForResponce);
-            [self killHUD];
+//            [self killHUD];
+            [activityIndicatorView stopAnimating];
             if ([strForResponce count]>0 && [strForResponce isKindOfClass:[NSArray class]]) {
                 arrayAllServerData=[[NSMutableArray alloc] initWithArray:strForResponce];
                 arrayForAfterSearch =[[NSMutableArray alloc] initWithArray:strForResponce copyItems:YES];
@@ -265,6 +285,7 @@ extern int checkForFB;
         }
         
     }
+    
 }
 
 -(void)actionOnUserProfile:(id)sender{
@@ -296,7 +317,8 @@ extern int checkForFB;
         NSArray * permissions = [[NSArray alloc] initWithObjects:@"publish_stream",@"read_stream",@"offline_access",@"email", nil];
         [[appDelegate facebook] authorize:permissions];
     } else {
-        [self showHUD];
+//        [self showHUD];
+        [activityIndicatorView startAnimating];
         [self performSelector:@selector(getAllfriends) withObject:nil afterDelay:0.2];
     }
     
@@ -308,10 +330,27 @@ extern int checkForFB;
     [self.navigationController pushViewController:obj animated:YES];
 
 }
+-(IBAction)actionOnEdit:(id)sender{
+   
+    if([btn_Edit.titleLabel.text isEqualToString:@"Edit"])
+        {
+            [tableForSearch reloadData];
+            [btn_Edit setImage:@"blank_btn.png" forState:UIControlEventTouchUpInside];
+            [btn_Edit setTitle:@"Done" forState:UIControlStateNormal];
+        }
+else if([btn_Edit.titleLabel.text isEqualToString:@"Done"])
+{
+    [btn_Edit setImage:@"blank_btn.png" forState:UIControlEventTouchUpInside];
+    [btn_Edit setTitle:@"Edit" forState:UIControlStateNormal];
+    [self performSelector:@selector(callServiceGroup) withObject:nil afterDelay:0.2];
+}
+
+
+}
 
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    self.navigationController.navigationBar.hidden=YES;
+     self.navigationController.navigationBar.hidden=YES;
     //[self.tabBarController setTabBarHidden:YES animated:NO];
     //[self.tabBarController setTabBarHidden:YES animated:NO completion:NULL];
 } 
@@ -362,12 +401,27 @@ extern int checkForFB;
 }
 - (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar
 {
-    
+//    [self.searchBarExplore setShowsCancelButton:NO animated:YES];
+//    [UIView beginAnimations:nil context:NULL];
+//    [UIView setAnimationDuration:0.2];
+//    //[self.searchBarExplore setFrame:CGRectMake(0, searchBarExplore.frame.origin.y-44, 320, 44)];
+//    //manoj added
+//    [UIView commitAnimations];
 }
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
 {
     
     //searchString=searchText;
+    if(searchText.length == 0)
+    {
+        [self.searchBarExplore endEditing:YES ];
+        [self.view endEditing:YES];
+        [searchBar resignFirstResponder];
+        [self performSelector:@selector(callServiceGroup) withObject:nil afterDelay:0.0];
+
+
+
+    }
     
 }
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
@@ -388,7 +442,8 @@ extern int checkForFB;
         NSString *searchText = searchBar.text;
         
         
-        [self showHUD];
+//        [self showHUD];
+        [activityIndicatorView startAnimating];
         [self performSelector:@selector(search_friend_on_people:) withObject:searchText afterDelay:0.2];
         
         /*
@@ -422,7 +477,8 @@ extern int checkForFB;
 }
 
 -(void)searchHandler:(id)sender{
-    [self killHUD];
+//    [self killHUD];
+    [activityIndicatorView stopAnimating];
     
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -442,7 +498,8 @@ extern int checkForFB;
         if (error==nil) {
             
             NSLog(@"value of string %@",strForResponce);
-            [self killHUD];
+//            [self killHUD];
+            [activityIndicatorView stopAnimating];
             if ([strForResponce count]>0) {
                 arrayAllServerData=[[NSMutableArray alloc] init];
                 for (int i=0; i<[strForResponce count]; i++) {
@@ -494,7 +551,8 @@ extern int checkForFB;
 //    [tableForSearch setUserInteractionEnabled:YES];
     
     
-    [self showHUD];
+//    [self showHUD];
+    [activityIndicatorView stopAnimating];
     [self performSelector:@selector(callServiceGroup) withObject:nil afterDelay:0.2];
 }
 
@@ -526,6 +584,14 @@ extern int checkForFB;
     [cell.imgProfile addTarget:self action:@selector(actionOnUserProfile:) forControlEvents:UIControlEventTouchUpInside];
     
     //[cell.imgProfile setImage:[UIImage imageNamed:[[arrayAllServerData objectAtIndex:indexPath.row] valueForKey:@"userProfile"]] forState:UIControlStateNormal];
+    NSSortDescriptor *sorter = [[NSSortDescriptor alloc]
+                                initWithKey:@"user_name"
+                                ascending:YES
+                                selector:@selector(localizedCaseInsensitiveCompare:)] ;
+    
+    NSArray *sortDescriptors = [NSArray arrayWithObject:sorter];
+    NSArray *sortedArray = [arrayForAfterSearch sortedArrayUsingDescriptors:sortDescriptors];
+    arrayForAfterSearch=[[NSMutableArray alloc] initWithArray:sortedArray copyItems:YES];
     cell.lblName.text=[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"user_name"];
     cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
     
@@ -533,24 +599,31 @@ extern int checkForFB;
     cell.imgForAddSing.hidden=NO;
     cell.imgForAddSing.frame=CGRectMake(240, 10, 40, 25);
     cell.imgForAddSing.tag=indexPath.row;
+    
+    if ([btn_Edit.titleLabel.text isEqualToString:@"Done"]) {
+
     if ([[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"status"] isEqualToString:@"YES"]) {
         //cell.imgBg.hidden=NO;
         [cell.imgForAddSing setImage:[UIImage imageNamed:@"plus_active.png"] forState:UIControlStateNormal];
         
         [cell.imgForAddSing addTarget:self action:@selector(callUnfollow:) forControlEvents:UIControlEventTouchUpInside];
     }else{
+          
         [cell.imgForAddSing setImage:[UIImage imageNamed:@"plus_inactive.png"] forState:UIControlStateNormal];
         [cell.imgForAddSing addTarget:self action:@selector(callfollow:) forControlEvents:UIControlEventTouchUpInside];
+        
     }
-    
+    }
 	return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (indexPath.row<[arrayForAfterSearch count]) {
+    if ([btn_Edit.titleLabel.text isEqualToString:@"Edit"]) {
+        if (indexPath.row<[arrayForAfterSearch count]) {
         OtherUserProfile *obj=[[OtherUserProfile alloc] init];
         obj.strForUserID=[[arrayForAfterSearch objectAtIndex:indexPath.row] valueForKey:@"friend_user_id"];
         [self.navigationController pushViewController:obj animated:YES];
+    }
     }
 }
 
@@ -568,7 +641,8 @@ extern int checkForFB;
 }
 
 -(void)unfollowHandler:(id)sender{
-    [self killHUD];
+//    [self killHUD];
+    [activityIndicatorView stopAnimating];
     
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -587,12 +661,14 @@ extern int checkForFB;
         
         if (error==nil) {
             
-            [self killHUD];
+//            [self killHUD];
+            [activityIndicatorView stopAnimating];
             if ([strForResponce count]>0) {
                 //[self showHUD];
                 self.searchDisplayController.searchBar.text=@"";
                 [self.searchBarExplore setShowsCancelButton:NO animated:YES];
-                [self showHUD];
+//                [self showHUD];
+                [activityIndicatorView startAnimating];
                 [self performSelector:@selector(callServiceGroup) withObject:nil afterDelay:0.2];
                 //[self performSelector:@selector(callWebService) withObject:nil afterDelay:0.2];
             }else{
@@ -634,13 +710,14 @@ extern int checkForFB;
     
     [arrayForAfterSearch replaceObjectAtIndex:btn.tag withObject:dic];
     [tableForSearch reloadData];
-    [service addFriendByCategory:strID friend_user_id:strFriendID user_category_id:@""];
+    [service addFriendByCategory:strID friend_user_id:strFriendID user_category_id:@"" ];
     
 }
 
 -(void)addFriendByCategoryHandler:(id)sender{
     
-    [self killHUD];
+//    [self killHUD];
+    [activityIndicatorView stopAnimating];
     
     if([sender isKindOfClass:[NSError class]]) {
         UIAlertView *errorAlert = [[UIAlertView alloc]
@@ -769,6 +846,7 @@ extern int checkForFB;
 
 - (void)viewDidUnload
 {
+    [self setBtn_Edit:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;

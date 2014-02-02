@@ -7,7 +7,9 @@
 //
 
 #import "SelectCategoryViewController.h"
+#import "PostViewController.h"
 
+NSString * const notify = @"DataComplete";
 extern NSDictionary *dicForCategorySelected;
 @implementation SelectCategoryViewController
 @synthesize tableViewForCategory;
@@ -59,8 +61,7 @@ extern NSDictionary *dicForCategorySelected;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    [self showHUD];
+     [self showHUD];
     [self performSelector:@selector(callWebServiceForCategory) withObject:nil afterDelay:0.2];
 }
 
@@ -131,6 +132,7 @@ extern NSDictionary *dicForCategorySelected;
 
 - (void)viewDidUnload
 {
+    [self setCan:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -198,12 +200,30 @@ extern NSDictionary *dicForCategorySelected;
     
 	return cell;
 }
+- (void)downloadDataComplete:(NSNotification *)notif
+{
+    
+}
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     if (indexPath.row<[arrayForCategory count]) {
         dicForCategorySelected=[arrayForCategory objectAtIndex:indexPath.row];
+         }
+    UIView *superView = [self.view superview];
+    CGRect frame = superView.frame;
+    [UIView setAnimationDelegate:self];
+    [UIView setAnimationDidStopSelector:@selector( animationDidStop:finished:context: )];
+    [UIView beginAnimations:@"slideMenu" context:(__bridge void *)(superView)];
+    [UIView setAnimationDelay:0.2];
+    [UIView setAnimationDuration:0.5];
+    if (frame.origin.y==0) {
+        frame.origin.y = -480;
+    }else{
+        frame.origin.y = -480;
     }
+    superView.frame = frame;
+    [UIView commitAnimations];
     
-    [self dismissModalViewControllerAnimated:YES];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"selectCategory" object:nil];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -211,7 +231,7 @@ extern NSDictionary *dicForCategorySelected;
     if (checkSeeMore==NO && indexPath.row==8) {
         return 80;
     }
-    return 50;
+    return 45;
     
 }
 -(void)actionOnSeeMore:(id)sender{
@@ -220,7 +240,20 @@ extern NSDictionary *dicForCategorySelected;
     [tableViewForCategory reloadData];
 }
 -(IBAction)actionOnCancel:(id)sender{
-    [self dismissModalViewControllerAnimated:YES];
+    UIView *superView = [self.view superview];
+    
+    CGRect frame = superView.frame;
+    [UIView setAnimationDelegate:self];
+    [UIView setAnimationDidStopSelector:@selector( animationDidStop:finished:context: )];
+    [UIView beginAnimations:@"slideMenu" context:(__bridge void *)(superView)];
+    if (frame.origin.y==0) {
+        frame.origin.y = -460;
+    }else{
+        frame.origin.y = -460;
+    }
+    superView.frame = frame;
+    [UIView commitAnimations];
+//    [self dismissModalViewControllerAnimated:YES];
 }
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {

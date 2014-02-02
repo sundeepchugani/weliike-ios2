@@ -1,0 +1,41 @@
+//
+//  SortingViewController.h
+//  WeLiiKe
+//
+//  Created by techvalens on 06/03/13.
+//  Copyright (c) 2013 __MyCompanyName__. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "HudView.h"
+#import "WeLiikeWebService.h"
+
+extern NSString *s1,*s2;
+@interface SortingViewController : UIViewController<UITextFieldDelegate,UITableViewDataSource,UITableViewDelegate>
+{
+    UITextField *txtFieldForCity;
+    UITextField *txtFieldSubCategory;
+    UIImageView *imgViewForSorting;
+    int selectedSort;
+    HudView *aHUD;
+    NSMutableDictionary *dicForCityAndSub;
+    UITableView *tableViewForCitySub;
+    NSMutableArray *arrayForData;
+    NSString *strForCitySubCate;
+
+    
+    
+}
+- (IBAction)actionOnReset:(id)sender;
+@property(nonatomic,retain)NSMutableDictionary *dicForCityAndSub;
+@property(nonatomic,retain)IBOutlet UIImageView *imgViewForSorting;
+@property(nonatomic,retain)IBOutlet UITextField *txtFieldForCity,*txtFieldSubCategory;
+-(IBAction)actionOnBack:(id)sender;
+-(IBAction)actionOnDone:(id)sender;
+
+-(IBAction)actionOnRating:(id)sender;
+-(IBAction)actionOnFriend:(id)sender;
+-(IBAction)actionOnProximity:(id)sender;
+-(IBAction)actionOnRecent:(id)sender;
+
+@end

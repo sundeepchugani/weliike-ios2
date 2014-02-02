@@ -15,6 +15,7 @@
     NSInteger getNumberOfStar;
     BOOL isDesable;
     NSString *strImage,*strStarActImage;
+    BOOL isStarselect;
 }
 @property(nonatomic,retain)NSString *strImage,*strStarActImage;
 @property(unsafe_unretained) id <CustomStarRankDelegate> delegate;

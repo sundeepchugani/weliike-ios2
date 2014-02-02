@@ -504,7 +504,9 @@ extern BOOL checkForLogInAndSignUp;
 }
 
 -(IBAction)actionForBack:(id)sender{
-    [self.navigationController popViewControllerAnimated:YES];
+    NSArray *array = [self.navigationController viewControllers];
+    NSLog(@"array = %@", array);
+    [self.navigationController popToViewController:[array objectAtIndex:4] animated:YES];
 }
 
 -(IBAction)actionOnList:(id)sender{
@@ -519,36 +521,36 @@ extern BOOL checkForLogInAndSignUp;
     
 }
 
--(IBAction)actionOnAtoZ:(id)sender{
-   
-    if (btnForAtoZ.tag==0) {
-        btnForAtoZ.tag=1;
-        [btnForAtoZ setImage:[UIImage imageNamed:@"a-z_btnBlue.png"] forState:UIControlStateNormal];
-        //NSSortDescriptor *sortByName = [NSSortDescriptor sortDescriptorWithKey:@"first_name" ascending:YES];
-        
-        NSSortDescriptor *sorter = [[NSSortDescriptor alloc]
-                                     initWithKey:@"first_name"
-                                     ascending:YES
-                                     selector:@selector(localizedCaseInsensitiveCompare:)] ;
-        
-        NSArray *sortDescriptors = [NSArray arrayWithObject:sorter];
-        NSArray *sortedArray = [arrayForSearchResult sortedArrayUsingDescriptors:sortDescriptors];
-        arrayForSearchResult=[[NSMutableArray alloc] initWithArray:sortedArray];
-        [tableForFriends reloadData];
-        
-    }else{
-        btnForAtoZ.tag=0;
-         [btnForAtoZ setImage:[UIImage imageNamed:@"a-z_btn.png"] forState:UIControlStateNormal];
-//        NSSortDescriptor *sortByName = [NSSortDescriptor sortDescriptorWithKey:@"first_name"
-//                                                                     ascending:NO];
-//        NSArray *sortDescriptors = [NSArray arrayWithObject:sortByName];
+//-(IBAction)actionOnAtoZ:(id)sender{
+//   
+//    if (btnForAtoZ.tag==0) {
+//        btnForAtoZ.tag=1;
+//        [btnForAtoZ setImage:[UIImage imageNamed:@"a-z_btnBlue.png"] forState:UIControlStateNormal];
+//        //NSSortDescriptor *sortByName = [NSSortDescriptor sortDescriptorWithKey:@"first_name" ascending:YES];
+//        
+//        NSSortDescriptor *sorter = [[NSSortDescriptor alloc]
+//                                     initWithKey:@"first_name"
+//                                     ascending:YES
+//                                     selector:@selector(localizedCaseInsensitiveCompare:)] ;
+//        
+//        NSArray *sortDescriptors = [NSArray arrayWithObject:sorter];
 //        NSArray *sortedArray = [arrayForSearchResult sortedArrayUsingDescriptors:sortDescriptors];
-        arrayForSearchResult=[[NSMutableArray alloc] initWithArray:arrayForServerData];
-        [tableForFriends reloadData];
-
-    }
-
-}
+//        arrayForSearchResult=[[NSMutableArray alloc] initWithArray:sortedArray];
+//        [tableForFriends reloadData];
+//        
+//    }else{
+//        btnForAtoZ.tag=0;
+//         [btnForAtoZ setImage:[UIImage imageNamed:@"a-z_btn.png"] forState:UIControlStateNormal];
+////        NSSortDescriptor *sortByName = [NSSortDescriptor sortDescriptorWithKey:@"first_name"
+////                                                                     ascending:NO];
+////        NSArray *sortDescriptors = [NSArray arrayWithObject:sortByName];
+////        NSArray *sortedArray = [arrayForSearchResult sortedArrayUsingDescriptors:sortDescriptors];
+//        arrayForSearchResult=[[NSMutableArray alloc] initWithArray:arrayForServerData];
+//        [tableForFriends reloadData];
+//
+//    }
+//
+//}
 
 
 

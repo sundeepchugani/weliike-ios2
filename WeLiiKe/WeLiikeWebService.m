@@ -165,10 +165,10 @@ static WeLiikeWebService* sharedInstance = nil;
 }
 //curl -X POST -d "master_category_id=5121d8d7236f175488000001"  http://localhost:3000/user_entity/get_entity_by_category_id.json
 //"entity[master_category_id]=%@" http://localhost:3000/master_entity/show.json
--(void)GetEntityByCategory:(NSString*)master_category_id page:(NSString *)page{
+-(void)GetEntityByCategory:(NSString*)master_category_id page:(NSString*)page user_id:(NSString*)user_id{
     
     //NSString *post = [NSString stringWithFormat:@"entity[master_category_id]=510646adf7e4f33e2c000005",@"510646adf7e4f33e2c000005"];
-    NSString *post = [NSString stringWithFormat:@"master_category_id=%@&page=%@",master_category_id,page];
+    NSString *post = [NSString stringWithFormat:@"master_category_id=%@&page=%@&user_id=%@",master_category_id,page,user_id];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     //NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding];
     NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
@@ -281,10 +281,10 @@ static WeLiikeWebService* sharedInstance = nil;
 }
 
 
--(void)saveMedia:(NSString *)entity_name comment:(NSString*)comment address:(NSString*)address lat:(NSString*)lat longitude:(NSString*)longitude master_category_id:(NSString*)master_category_id entity_image:(NSString*)entity_image user_id:(NSString*)user_id user_category_id:(NSString*)user_category_id api_id:(NSString*)api_id rating_count:(NSString*)rating_count group_id:(NSString*)group_id email:(NSString*)email receiver_id:(NSString*)receiver_id feed:(NSString*)feed sub_category:(NSString*)sub_category city:(NSString *)city{
+-(void)saveMedia:(NSString *)entity_name comment:(NSString*)comment address:(NSString*)address lat:(NSString*)lat longitude:(NSString*)longitude master_category_id:(NSString*)master_category_id entity_image:(NSString*)entity_image user_id:(NSString*)user_id user_category_id:(NSString*)user_category_id api_id:(NSString*)api_id rating_count:(NSString*)rating_count group_id:(NSString*)group_id email:(NSString*)email receiver_id:(NSString*)receiver_id feed:(NSString*)feed sub_category:(NSString*)sub_category city:(NSString *)city def:(BOOL)def is_active:(BOOL)is_active {
     
     
-    NSString *post = [NSString stringWithFormat:@"api_id=%@&entity_name=%@&comment=%@&address=%@&lat=%@&longitude=%@&master_category_id=%@&entity_image=%@&user_id=%@&user_category_id=%@&rating_count=%@&group_id=%@&email_list=%@&receiver_id=%@&feed=%@&sub_category=%@&city=%@",api_id,entity_name,comment,address,lat,longitude,master_category_id,entity_image,user_id,user_category_id,rating_count,group_id,email,receiver_id,feed,sub_category,city];
+    NSString *post = [NSString stringWithFormat:@"api_id=%@&entity_name=%@&comment=%@&address=%@&lat=%@&longitude=%@&master_category_id=%@&entity_image=%@&user_id=%@&user_category_id=%@&rating_count=%@&group_id=%@&email_list=%@&receiver_id=%@&feed=%@&sub_category=%@&city=%@&def=%d&is_active=%d",api_id,entity_name,comment,address,lat,longitude,master_category_id,entity_image,user_id,user_category_id,rating_count,group_id,email,receiver_id,feed,sub_category,city,def,is_active];
     //NSLog(@"value of **************** %@",post);
     
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
@@ -302,7 +302,7 @@ static WeLiikeWebService* sharedInstance = nil;
     
 }
 
--(void)addFriendByCategory:(NSString *)user_id friend_user_id:(NSString*)friend_user_id user_category_id:(NSString*)user_category_id{
+-(void)addFriendByCategory:(NSString *)user_id friend_user_id:(NSString*)friend_user_id user_category_id:(NSString*)user_category_id {
     
     NSString *post = [NSString stringWithFormat:@"user_id=%@&friend_user_id=%@&user_category_id=%@",user_id,friend_user_id,user_category_id];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
@@ -740,7 +740,7 @@ static WeLiikeWebService* sharedInstance = nil;
 //curl -X POST -d "comment_text=This is Nice for all Users&user_id=513471b2f7e4f330e9000097&user_entity_id=513dd21bf7e4f3b1dd000016&rating_count=5&self_user_id=513471b2f7e4f330e9000097" http://localhost:3000/comment/entity_comment.json
 -(void)EntityComment:(NSString*)rating_count comment_text:(NSString*)comment_text user_id:(NSString*)user_id user_entity_id:(NSString*)user_entity_id selfUserId:(NSString *)selfUserId{
     
-    NSString *post = [NSString stringWithFormat:@"comment_text=%@&user_id=%@&user_entity_id=%@&rating_count=%@&self_user_id=%@",comment_text,user_id,user_entity_id,rating_count,selfUserId];
+     NSString *post = [NSString stringWithFormat:@"comment_text=%@&user_id=%@&user_entity_id=%@&rating_count=%@&self_user_id=%@",comment_text,user_id,user_entity_id,rating_count,selfUserId];
     //NSString *post = [NSString stringWithFormat:@"category[user_id]=510f5cd5f7e4f33070000026"];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     //NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding];
@@ -1142,9 +1142,9 @@ static WeLiikeWebService* sharedInstance = nil;
     
 }
 
--(void)news_feed1:(NSString*)page{
+-(void)news_feed1:(NSString*)page userID:(NSString*)uid{
     
-    NSString *post = [NSString stringWithFormat:@"page=%@",page];
+    NSString *post = [NSString stringWithFormat:@"page=%@&user_id=%@",page,uid];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     //NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding];
     NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
@@ -1442,7 +1442,7 @@ static WeLiikeWebService* sharedInstance = nil;
 	}
 	else{
 		if([self._delegate respondsToSelector:self._callback]) {
-			[self._delegate performSelector:self._callback withObject:string];
+			[self._delegate performSelector:self._callback withObject:responseString];
 		}else{
 			NSLog(@"Callback is not responding.");
 		}

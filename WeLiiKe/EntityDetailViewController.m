@@ -174,7 +174,7 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier1];
     }
     if (indexPath.row==0) {
-        AsyncImageViewSmall *image=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(0, 0, 320, 250)];
+        AsyncImageViewSmall *image=[[AsyncImageViewSmall alloc] initWithFrame:CGRectMake(300, 0, 320, 100)];
         NSString *strUrl=@"";
         if ([strForEntity isEqualToString:@"entity"]) {
             strUrl=[dicForDetail valueForKey:@"user_entity_image"];

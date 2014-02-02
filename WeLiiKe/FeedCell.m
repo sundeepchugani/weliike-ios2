@@ -24,23 +24,28 @@
         viewForback=[[UIView alloc] init];
         [viewForback setBackgroundColor:[UIColor whiteColor]];
         
-        btnForUserName=[[UIButton alloc] initWithFrame:CGRectMake(5, 2, 100, 30)];
+        btnForUserName=[[UIButton alloc] initWithFrame:CGRectMake(-23, -2, 100, 30)];
         //[btnForUserName setTitle:[[arrayForData objectAtIndex:i] valueForKey:@"UserName"] forState:UIControlStateNormal];
-        [btnForUserName.titleLabel setFont:[UIFont boldSystemFontOfSize:14]];
-        [btnForUserName setTitleColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0] forState:UIControlStateNormal];
+        [btnForUserName.titleLabel setFont:[UIFont boldSystemFontOfSize:13]];
+        [btnForUserName setTitleColor:[UIColor colorWithRed:102.0/255.0 green:102.0/255.0 blue:102.0/255.0 alpha:1.0] forState:UIControlStateNormal];
         [btnForUserName setBackgroundColor:[UIColor clearColor]];
         [viewForback addSubview:btnForUserName];
         
         
-        btnForCategory=[[UIButton alloc] initWithFrame:CGRectMake(225,-5, 80, 30)];
+        btnForCategory=[[UIButton alloc] initWithFrame:CGRectMake(175, -2, 175, 30)];
         btnForCategory.titleLabel.lineBreakMode = UILineBreakModeWordWrap;
         //[btnForCategory setTitle:[[arrayForData objectAtIndex:i] valueForKey:@"category"] forState:UIControlStateNormal];
-        [btnForCategory setBackgroundImage:[UIImage imageNamed:@"button_bgFeed.png"] forState:UIControlStateNormal];
-        [btnForCategory setTitleColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0] forState:UIControlStateNormal];
-        [btnForCategory.titleLabel setFont:[UIFont boldSystemFontOfSize:11]];
-        //[btnForCategory setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        //SUNDEEP: REPLACE "NIL" BELOW FOR @"button_bgFeed.png"
+        [btnForCategory setBackgroundImage:[UIImage imageNamed:nil] forState:UIControlStateNormal];
+        //2 lines below added by SUNDEEP
+        [btnForCategory.titleLabel setTextAlignment: UITextAlignmentRight];
+        //[btnForCategory setTitleColor:[UIColor colorWithRed:51.0/255.0 green:153.0/255.0 blue:255.0/255.0 alpha:1.0] forState:UIControlStateNormal];
+        [btnForCategory.titleLabel setFont:[UIFont boldSystemFontOfSize:13]];
+        //UNCOMMENTED AND EDITED BY SUNDEEP
+        [btnForCategory setTitleColor:[UIColor colorWithRed:0.0/255.0 green:153.0/255.0 blue:204.0/255.0 alpha:1.0] forState:UIControlStateNormal];
         [btnForCategory setBackgroundColor:[UIColor clearColor]];
         [viewForback addSubview:btnForCategory];
+        //END OF SUNDEEP
         
         scrollViewCell=[[UIScrollView alloc] initWithFrame:CGRectMake(0, 35, 320, 140)];
         scrollViewCell.pagingEnabled=YES;
